@@ -6,6 +6,7 @@ export interface Location {
     type: 'location',
     id?: string,
     name?: string,
+    poi?: boolean,
     address?: string,
     longitude?: number,
     latitude?: number,
@@ -19,6 +20,7 @@ export interface Products {
     regional?: boolean,
     suburban?: boolean,
     bus?: boolean,
+    express?: boolean,
     ferry?: boolean,
     subway?: boolean,
     tram?: boolean,
@@ -29,7 +31,9 @@ export interface Station {
     type: 'station',
     id: string,
     name: string,
+    station?: Station,
     location?: Location,
+    products?: Products,
     regions?: string[] // region ids
 }
 
@@ -102,10 +106,12 @@ export interface StopOver {
     departure?: string, // null, if last stopOver of trip
     departureDelay?: number,
     plannedDeparture?: string,
+    departurePlatform?: string,
     plannedDeparturePlatform?: string,
     arrival?: string, // null, if first stopOver of trip
     arrivalDelay?: number,
     plannedArrival?: string,
+    arrivalPlatform?: string,
     plannedArrivalPlatform?: string,
     remarks?: Hint[],
 }
@@ -133,7 +139,8 @@ export interface Trip {
 
 export interface Price {
     amount: number,
-    currency: string
+    currency: string,
+    hint?: string
 }
 
 export interface Leg {
@@ -175,13 +182,13 @@ export interface Journeys {
 
 export interface Duration {
     duration: number,
-    stations: Station[]
+    stations: (Station | Stop)[]
 }
 
 export interface JourneysOptions {
     departure?: Date,
     arrival?: Date,
-    results?: number; // number of journeys 
+    results?: number, // number of journeys 
     via?: string, // let journeys pass this station
     stopovers?: boolean // return stations on the way?
     transfers?: number, // Maximum nr of transfers. Default: Let HAFAS decide.
@@ -262,7 +269,7 @@ export interface HafasClient {
     trip: (id: string, name: string, options: TripOptions | undefined) => Promise<Trip>
     departures: (station: string | Station, options: DeparturesArrivalsOptions | undefined) => Promise<Journeys>,
     arrivals: (station: string | Station, options: DeparturesArrivalsOptions | undefined) => Promise<Journeys>,
-    locations: (from: string, options: LocationsOptions | undefined) => Promise<Station[]>,
+    locations: (from: string, options: LocationsOptions | undefined) => Promise<(Stop | Location)[]>,
     stop: (id: string, options: StopOptions | undefined) => Promise<Stop>
     nearBy: (location: Location, options: NearByOptions | undefined) => Promise<Stop>
     reachableFrom: (address: Location, options: ReachableFromOptions | undefined) => Promise<Duration[]>

@@ -8,10 +8,10 @@ open Fable.SimpleJson
 
 let printLocations (client: HafasClient) name =
     promise {
-        let! stations = client.locations name (Some defaultLocationOptions)
-        let json1 = Json.stringify stations
+        let! stopsOrLocations = client.locations name (Some defaultLocationOptions)
+        let json1 = Json.stringify stopsOrLocations
         printfn "%s" json1
-        let json2 = SimpleJson.toString (HafasClientTypesDump.dumpStations stations)
+        let json2 = SimpleJson.toString (HafasClientTypesDump.dumpU2StopsLocations stopsOrLocations)
         printfn "%s" json2
     }
     |> ignore
@@ -20,7 +20,11 @@ let printReachableFrom (client: HafasClient) name =
     promise {
         try
             let! stations = client.locations name (Some defaultLocationOptions)
-            match stations.[0].location with
+            let location =
+                match stations.[0] with
+                | Location location -> Some location
+                | Stop stop -> stop.location
+            match location with
             | Some location ->
                 location.address <- Some "dummy"
                 let! durations = client.reachableFrom location None
@@ -49,9 +53,11 @@ let journeys (client: HafasClient) fromStation toStation =
         try
             let! stationsFrom = client.locations fromStation (Some(locationOptions 1))
             let! stationsTo = client.locations toStation (Some(locationOptions 1))
-            let! res = client.journeys (U3.Case1 stationsFrom.[0].id) (U3.Case1 stationsTo.[0].id)
-                           (Some defaultJourneyOptions)
-            return res.journeys
+            match stationsFrom.[0], stationsTo.[0] with
+            | Stop sFrom, Stop sTo ->
+                let! res = client.journeys (U3.Case1 sFrom.id) (U3.Case1 sTo.id) (Some defaultJourneyOptions)
+                return res.journeys
+            | _ -> return new ResizeArray<Journey>()
         with ex ->
             printf "journeys error: %s" ex.Message
             return new ResizeArray<Journey>()

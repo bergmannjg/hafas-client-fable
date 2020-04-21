@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# the files xx01*.json should be a superset of the corresponding files xx00*.json 
+# test if json-diff outputs lines with starting '-'
+
+rm xx*.json
+
+NAME=Hannover
+node build/JourneyInfoApp.js Db locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
+LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
+test $LINES -ne 0 && echo "error in cmd: locations ${NAME}"
+
+NAME=Alexanderplatz
+node build/JourneyInfoApp.js Vbb locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
+LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
+test $LINES -ne 0 && echo "error in cmd: locations ${NAME}"
+
+NAME=Bielefeld
+node build/JourneyInfoApp.js Db reachableFrom ${NAME} | csplit -sb "%02dVon${NAME}.json" - 2
+LINES=$(npx json-diff xx00Von${NAME}.json xx01Von${NAME}.json | grep "^-" | wc -l)
+test $LINES -ne 0 && echo "error in cmd: reachableFrom ${NAME}"
+
+NAME=HannoverBerlinTrip
+node build/JourneyInfoApp.js Db trip "1|316017|0|80|21042020" | csplit -sb "%02d${NAME}.json" - 2
+LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
+test $LINES -ne 0 && echo "error in cmd: trip ${NAME}"
+

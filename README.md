@@ -32,4 +32,5 @@ The App prints two json objects:
 
 Example. usage: **node build/JourneyInfoApp.js Db journeys Berlin Hannover | csplit -b "%02d.json" - 2**
 
-You can compare the two json files to evaluate the coverage of the TypeScipt declaration file with the hafas-client interface.
+You can compare the two json files to evaluate the coverage of the TypeScipt declaration file with the hafas-client interface,
+see [runtests](./scripts/runtests)

@@ -12,6 +12,7 @@ type [<AllowNullLiteral>] Location =
     abstract ``type``: string with get, set
     abstract id: string option with get, set
     abstract name: string option with get, set
+    abstract poi: bool option with get, set
     abstract address: string option with get, set
     abstract longitude: float option with get, set
     abstract latitude: float option with get, set
@@ -24,6 +25,7 @@ type [<AllowNullLiteral>] Products =
     abstract regional: bool option with get, set
     abstract suburban: bool option with get, set
     abstract bus: bool option with get, set
+    abstract express: bool option with get, set
     abstract ferry: bool option with get, set
     abstract subway: bool option with get, set
     abstract tram: bool option with get, set
@@ -33,7 +35,9 @@ type [<AllowNullLiteral>] Station =
     abstract ``type``: string with get, set
     abstract id: string with get, set
     abstract name: string with get, set
+    abstract station: Station option with get, set
     abstract location: Location option with get, set
+    abstract products: Products option with get, set
     abstract regions: ResizeArray<string> option with get, set
 
 type [<AllowNullLiteral>] Stop =
@@ -97,10 +101,12 @@ type [<AllowNullLiteral>] StopOver =
     abstract departure: string option with get, set
     abstract departureDelay: float option with get, set
     abstract plannedDeparture: string option with get, set
+    abstract departurePlatform: string option with get, set
     abstract plannedDeparturePlatform: string option with get, set
     abstract arrival: string option with get, set
     abstract arrivalDelay: float option with get, set
     abstract plannedArrival: string option with get, set
+    abstract arrivalPlatform: string option with get, set
     abstract plannedArrivalPlatform: string option with get, set
     abstract remarks: ResizeArray<Hint> option with get, set
 
@@ -127,6 +133,7 @@ type [<AllowNullLiteral>] Trip =
 type [<AllowNullLiteral>] Price =
     abstract amount: float with get, set
     abstract currency: string with get, set
+    abstract hint: string option with get, set
 
 type [<AllowNullLiteral>] Leg =
     abstract tripId: string option with get, set
@@ -164,7 +171,7 @@ type [<AllowNullLiteral>] Journeys =
 
 type [<AllowNullLiteral>] Duration =
     abstract duration: float with get, set
-    abstract stations: ResizeArray<Station> with get, set
+    abstract stations: ResizeArray<U2<Station, Stop>> with get, set
 
 type [<AllowNullLiteral>] JourneysOptions =
     abstract departure: DateTime option with get, set
@@ -242,7 +249,7 @@ type [<AllowNullLiteral>] HafasClient =
     abstract trip: (string -> string -> TripOptions option -> Promise<Trip>) with get, set
     abstract departures: (U2<string, Station> -> DeparturesArrivalsOptions option -> Promise<Journeys>) with get, set
     abstract arrivals: (U2<string, Station> -> DeparturesArrivalsOptions option -> Promise<Journeys>) with get, set
-    abstract locations: (string -> LocationsOptions option -> Promise<ResizeArray<Station>>) with get, set
+    abstract locations: (string -> LocationsOptions option -> Promise<ResizeArray<U2<Stop, Location>>>) with get, set
     abstract stop: (string -> StopOptions option -> Promise<Stop>) with get, set
     abstract nearBy: (Location -> NearByOptions option -> Promise<Stop>) with get, set
     abstract reachableFrom: (Location -> ReachableFromOptions option -> Promise<ResizeArray<Duration>>) with get, set
