@@ -1,0 +1,16 @@
+build/
+node_modules/
+
+src/obj/
+src/bin/
+
+JsonGenerator/obj/
+JsonGenerator/bin/
+
+xx*.json
+
+.fable
+.ionide
+.vscode
+
+package-lock.json
