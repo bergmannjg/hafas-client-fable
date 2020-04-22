@@ -60,6 +60,7 @@ type [<AllowNullLiteral>] Line =
     abstract name: string with get, set
     abstract adminCode: string option with get, set
     abstract fahrtNr: string option with get, set
+    abstract additionalName: string option with get, set
     abstract product: string option with get, set
     abstract ``public``: bool option with get, set
     abstract mode: LineMode with get, set
@@ -164,6 +165,7 @@ type [<AllowNullLiteral>] Journey =
     abstract ``type``: string with get, set
     abstract legs: ResizeArray<Leg> with get, set
     abstract refreshToken: string option with get, set
+    abstract remarks: ResizeArray<Hint> option with get, set
     abstract price: Price option with get, set
 
 type [<AllowNullLiteral>] Journeys =

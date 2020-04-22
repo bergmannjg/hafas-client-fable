@@ -59,6 +59,7 @@ export interface Line {
     name: string,
     adminCode?: string,
     fahrtNr?: string,
+    additionalName?: string,
     product?: string,
     public?: boolean,
     mode: 'train' | 'bus' | 'watercraft' | 'taxi' | 'gondola' | 'aircraft' | 'car' | 'bicycle' | 'walking',
@@ -173,6 +174,7 @@ export interface Journey {
     type: 'journey',
     legs: Leg[],
     refreshToken?: string,
+    remarks?: Hint[],
     price?: Price
 }
 

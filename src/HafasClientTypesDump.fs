@@ -176,6 +176,10 @@ let dumpLine (x: Line) =
     match x.fahrtNr with
         | Some v -> JString v
         | None -> JNull
+    "additionalName",
+    match x.additionalName with
+        | Some v -> JString v
+        | None -> JNull
     "product",
     match x.product with
         | Some v -> JString v
@@ -451,6 +455,10 @@ let dumpJourney (x: Journey) =
     "refreshToken",
     match x.refreshToken with
         | Some v -> JString v
+        | None -> JNull
+    "remarks",
+    match x.remarks with
+        | Some v -> JArray [ for e in v do yield dumpHint e]
         | None -> JNull
     "price",
     match x.price with

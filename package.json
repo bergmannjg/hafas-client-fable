@@ -10,7 +10,6 @@
     "fable-loader": "^2.1.8",
     "fable-splitter": "^2.1.12",
     "hafas-client": "^5.5.0",
-    "json-diff": "^0.5.4",
     "ts2fable": "^0.7.1"
   }
 }

@@ -1,27 +1,55 @@
 #!/bin/bash
 
 # the files xx01*.json should be a superset of the corresponding files xx00*.json 
-# test if json-diff outputs lines with starting '-'
+# check it in 4 steps
+# 1) sort with jq
+# 2) remove null values
+# 3) repair json
+# 4) compare files with diff
 
-rm xx*.json
+
+# sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g'
+
+check_files () {
+    local NAME=$1
+    jq -S '.' xx00${NAME}.json > xx00${NAME}-s.json
+    sed  '/: null/d' xx00${NAME}-s.json > xx00${NAME}-d.json
+    jq -S '.' xx01${NAME}.json > xx01${NAME}-s.json
+    sed  '/: null/d' xx01${NAME}-s.json > xx01${NAME}-d.json
+
+    # change ',\n}' to '\n}'
+    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx00${NAME}-d.json > xx00${NAME}-x.json
+    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx01${NAME}-d.json > xx01${NAME}-x.json
+
+    diff -I ": null" xx00${NAME}-x.json xx01${NAME}-x.json
+}
+
+rm -f xx*.json
 
 NAME=Hannover
+echo "locations ${NAME}"
 node build/JourneyInfoApp.js Db locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
-LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
-test $LINES -ne 0 && echo "error in cmd: locations ${NAME}"
+check_files $NAME
 
 NAME=Alexanderplatz
+echo "locations ${NAME}"
 node build/JourneyInfoApp.js Vbb locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
-LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
-test $LINES -ne 0 && echo "error in cmd: locations ${NAME}"
+check_files $NAME
 
-NAME=Bielefeld
+NAME=Hannover
+echo "reachableFrom ${NAME}"
 node build/JourneyInfoApp.js Db reachableFrom ${NAME} | csplit -sb "%02dVon${NAME}.json" - 2
-LINES=$(npx json-diff xx00Von${NAME}.json xx01Von${NAME}.json | grep "^-" | wc -l)
-test $LINES -ne 0 && echo "error in cmd: reachableFrom ${NAME}"
+check_files "Von$NAME"
 
-NAME=HannoverBerlinTrip
+NAME=HannoverBerlin
+echo "trip ${NAME}"
 node build/JourneyInfoApp.js Db trip "1|316017|0|80|21042020" | csplit -sb "%02d${NAME}.json" - 2
-LINES=$(npx json-diff xx00${NAME}.json xx01${NAME}.json | grep "^-" | wc -l)
-test $LINES -ne 0 && echo "error in cmd: trip ${NAME}"
+check_files $NAME
+
+FROM=Berlin
+TO=Paris
+NAME=${FROM}Nach${TO}
+echo "journeys ${FROM} ${TO}"
+node build/JourneyInfoApp.js Db journeys ${FROM} ${TO} | csplit -sb "%02d${NAME}.json" - 2
+check_files $NAME
 

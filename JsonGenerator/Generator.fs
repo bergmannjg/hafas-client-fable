@@ -39,14 +39,10 @@ let generateDumpFunction (ty: Type) =
 
     let getU2StationStopStmt (name: string) =
         let line = System.Collections.Generic.List()
-        sprintf " match %s with " name
-        |> line.Add
-        sprintf "| Station station -> dumpStation station "
-        |> line.Add
-        sprintf "| Stop stop -> dumpStop stop "
-        |> line.Add
-        sprintf "| _ -> JNull "
-        |> line.Add
+        sprintf " match %s with " name |> line.Add
+        sprintf "| Station station -> dumpStation station " |> line.Add
+        sprintf "| Stop stop -> dumpStop stop " |> line.Add
+        sprintf "| _ -> JNull " |> line.Add
         line |> String.concat ""
 
     let getArrayValueStmt (prop: PropertyInfo) (g: Type) valName =
@@ -83,7 +79,8 @@ let generateDumpFunction (ty: Type) =
     let getGenericTypeStmt (prop: PropertyInfo) (pt: Type) (genericTypes: Type []) =
         match pt.Name with
         | "FSharpOption`1" -> getOptionTypeStmt prop genericTypes.[0]
-        | "U2`2" when genericTypes.[0].Name = "Station" && genericTypes.[1].Name = "Stop" -> (getU2StationStopStmt ("x." + prop.Name) + "\n")
+        | "U2`2" when genericTypes.[0].Name = "Station" && genericTypes.[1].Name = "Stop" ->
+            (getU2StationStopStmt ("x." + prop.Name) + "\n")
         | "List`1" -> getArrayValueStmt prop genericTypes.[0] ("x." + prop.Name)
         | _ -> tab + "\"" + prop.Name + "\": JString \"undefined\"\n"
 
@@ -95,13 +92,16 @@ let generateDumpFunction (ty: Type) =
                                              let q = getQuotes4Member prop.Name
                                              getValueStmt prop pt ("x." + q + prop.Name + q)
 
-    let stmtsOfProps =
+    let getStmtsOfProps =
         ty.GetProperties(BindingFlags.Public ||| BindingFlags.Instance)
         |> Array.fold (fun desc prop -> desc + getStmtsOfProp prop) ""
 
-    printfn "let dump%s (x: %s) =" ty.Name ty.Name
+    let stmtsOfProps = getStmtsOfProps
+    let functionName = "dump" + ty.Name
+    let isRec = stmtsOfProps.IndexOf(functionName) >= 0
+    printfn "let %s%s (x: %s) =" (if isRec then "rec " else "") functionName ty.Name
     printfn "%s[" tab
-    printf "%s" stmtsOfProps
+    printf "%s" getStmtsOfProps
     printfn "%s]" tab
     printfn "%s|> Map.ofList" tab
     printfn "%s|> JObject\n" tab
