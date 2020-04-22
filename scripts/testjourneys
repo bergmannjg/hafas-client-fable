@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# the files xx01*.json should be a superset of the corresponding files xx00*.json 
+# check it in 4 steps
+# 1) sort with jq
+# 2) remove null values
+# 3) repair json
+# 4) compare files with diff
+
+check_files () {
+    local NAME=$1
+    jq -S '.' xx00${NAME}.json > xx00${NAME}-s.json
+    sed  '/: null/d' xx00${NAME}-s.json > xx00${NAME}-d.json
+    jq -S '.' xx01${NAME}.json > xx01${NAME}-s.json
+    sed  '/: null/d' xx01${NAME}-s.json > xx01${NAME}-d.json
+
+    # change ',\n}' to '\n}'
+    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx00${NAME}-d.json > xx00${NAME}-x.json
+    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx01${NAME}-d.json > xx01${NAME}-x.json
+
+    diff -I ": null" xx00${NAME}-x.json xx01${NAME}-x.json
+}
+
+if [ $# -ne 3 ]
+then
+    echo "$0 profile from to"
+    exit 1
+fi
+
+if [ $1 != 'Db' ] && [ $1 != 'Vbb' ] && [ $1 != 'Sncb' ]
+then
+    echo "profile is Db|Sncb|Vbb"
+    exit 1
+fi
+
+rm -f xx*.json
+
+PROFILE=$1
+FROM=$2
+TO=$3
+NAME=${FROM}Nach${TO}
+NAME=$(echo $NAME | sed 's/ //g')
+echo "journeys ${PROFILE} ${FROM} ${TO}"
+node build/JourneyInfoApp.js ${PROFILE} journeys "${FROM}" "${TO}" | csplit -sb "%02d${NAME}.json" - 2
+check_files $NAME
+

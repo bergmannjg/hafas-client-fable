@@ -97,6 +97,26 @@ let dumpProducts (x: Products) =
     match x.taxi with
         | Some v -> JBool  v
         | None -> JNull
+    "high-speed-train",
+    match x?``high-speed-train`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "intercity-p",
+    match x?``intercity-p`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "local-train",
+    match x?``local-train`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "metro",
+    match x.metro with
+        | Some v -> JBool  v
+        | None -> JNull
+    "s-train",
+    match x?``s-train`` with
+        | Some v -> JBool  v
+        | None -> JNull
     ]
     |> Map.ofList
     |> JObject
@@ -390,7 +410,10 @@ let dumpLeg (x: Leg) =
     match x.plannedDeparturePlatform with
         | Some v -> JString v
         | None -> JNull
-    "arrival",JString x.arrival
+    "arrival",
+    match x.arrival with
+        | Some v -> JString v
+        | None -> JNull
     "plannedArrival",JString x.plannedArrival
     "arrivalDelay",
     match x.arrivalDelay with
@@ -443,6 +466,18 @@ let dumpLeg (x: Leg) =
     "loadFactor",
     match x.loadFactor with
         | Some v -> JString v
+        | None -> JNull
+    "distance",
+    match x.distance with
+        | Some v -> JNumber  v
+        | None -> JNull
+    "public",
+    match x.``public`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "transfer",
+    match x.transfer with
+        | Some v -> JBool  v
         | None -> JNull
     ]
     |> Map.ofList

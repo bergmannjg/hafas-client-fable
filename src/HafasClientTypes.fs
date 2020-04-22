@@ -30,6 +30,11 @@ type [<AllowNullLiteral>] Products =
     abstract subway: bool option with get, set
     abstract tram: bool option with get, set
     abstract taxi: bool option with get, set
+    abstract ``high-speed-train``: bool option with get, set
+    abstract ``intercity-p``: bool option with get, set
+    abstract ``local-train``: bool option with get, set
+    abstract metro: bool option with get, set
+    abstract ``s-train``: bool option with get, set
 
 type [<AllowNullLiteral>] Station =
     abstract ``type``: string with get, set
@@ -145,7 +150,7 @@ type [<AllowNullLiteral>] Leg =
     abstract departureDelay: float option with get, set
     abstract departurePlatform: string option with get, set
     abstract plannedDeparturePlatform: string option with get, set
-    abstract arrival: string with get, set
+    abstract arrival: string option with get, set
     abstract plannedArrival: string with get, set
     abstract arrivalDelay: float option with get, set
     abstract arrivalPlatform: string option with get, set
@@ -160,6 +165,9 @@ type [<AllowNullLiteral>] Leg =
     abstract cancelled: bool option with get, set
     abstract walking: bool option with get, set
     abstract loadFactor: string option with get, set
+    abstract distance: float option with get, set
+    abstract ``public``: bool option with get, set
+    abstract transfer: bool option with get, set
 
 type [<AllowNullLiteral>] Journey =
     abstract ``type``: string with get, set

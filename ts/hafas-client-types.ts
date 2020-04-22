@@ -24,7 +24,12 @@ export interface Products {
     ferry?: boolean,
     subway?: boolean,
     tram?: boolean,
-    taxi?: boolean
+    taxi?: boolean,
+    "high-speed-train"?: boolean,
+    "intercity-p"?: boolean,
+    "local-train"?: boolean,
+    metro?: boolean,
+    "s-train"?: boolean,
 }
 
 export interface Station {
@@ -153,7 +158,7 @@ export interface Leg {
     departureDelay?: number,
     departurePlatform?: string,
     plannedDeparturePlatform?: string,
-    arrival: string,
+    arrival?: string,
     plannedArrival: string,
     arrivalDelay?: number,
     arrivalPlatform?: string,
@@ -167,7 +172,10 @@ export interface Leg {
     reachable?: boolean,
     cancelled?: boolean,
     walking?: boolean,
-    loadFactor?: string
+    loadFactor?: string,
+    distance?: number,
+    public?: boolean,
+    transfer?: boolean
 }
 
 export interface Journey {

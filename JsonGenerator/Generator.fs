@@ -16,10 +16,14 @@ let generateDumpFunction (ty: Type) =
         | "Boolean" -> "JBool "
         | _ -> "JObject"
 
-    let getQuotes4Member typename =
-        match typename with
+    let (|SpecialChars|_|) (name:string) = 
+        if name.Contains '-' then Some true else None
+
+    let getQuotes4Member name =
+        match name with
         | "type" -> "``"
         | "public" -> "``"
+        | SpecialChars name -> "``"
         | _ -> ""
 
     let getQuotes4Value (formatName: string) (valName: string) =
@@ -73,7 +77,8 @@ let generateDumpFunction (ty: Type) =
 
     let getOptionTypeStmt (prop: PropertyInfo) (g: Type) =
         let q = getQuotes4Member prop.Name
-        "\n" + tab + sprintf "match x.%s with\r\n" (q + prop.Name + q) + getOptionTypeSomeStmt prop g
+        let op = if prop.Name.Contains '-' then "?" else "." // todo: why we need this
+        "\n" + tab + sprintf "match x%s%s with\r\n" op (q + prop.Name + q) + getOptionTypeSomeStmt prop g
         + getOptionTypeNoneStmt prop
 
     let getGenericTypeStmt (prop: PropertyInfo) (pt: Type) (genericTypes: Type []) =
