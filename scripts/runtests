@@ -1,72 +1,19 @@
 #!/bin/bash
 
-# the files xx01*.json should be a superset of the corresponding files xx00*.json 
-# check it in 4 steps
-# 1) sort with jq
-# 2) remove null values
-# 3) repair json
-# 4) compare files with diff
+./scripts/runtest Bvg locations Alexanderplatz
+./scripts/runtest Db locations Hannover
+./scripts/runtest Nahsh locations Husum
+./scripts/runtest Oebb locations Wien
+./scripts/runtest Pkp locations Warschau
+./scripts/runtest Vbb locations Alexanderplatz
 
-check_files () {
-    local NAME=$1
-    jq -S '.' xx00${NAME}.json > xx00${NAME}-s.json
-    sed  '/: null/d' xx00${NAME}-s.json > xx00${NAME}-d.json
-    jq -S '.' xx01${NAME}.json > xx01${NAME}-s.json
-    sed  '/: null/d' xx01${NAME}-s.json > xx01${NAME}-d.json
+./scripts/runtest Db reachableFrom Hannover
 
-    # change ',\n}' to '\n}'
-    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx00${NAME}-d.json > xx00${NAME}-x.json
-    sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx01${NAME}-d.json > xx01${NAME}-x.json
-
-    diff -I ": null" xx00${NAME}-x.json xx01${NAME}-x.json
-}
-
-rm -f xx*.json
-
-NAME=Hannover
-echo "locations ${NAME}"
-node build/JourneyInfoApp.js Db locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-NAME=Alexanderplatz
-echo "locations ${NAME}"
-node build/JourneyInfoApp.js Vbb locations ${NAME} | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-NAME=Hannover
-echo "reachableFrom ${NAME}"
-node build/JourneyInfoApp.js Db reachableFrom ${NAME} | csplit -sb "%02dVon${NAME}.json" - 2
-check_files "Von$NAME"
-
-NAME=HannoverBerlin
-echo "trip ${NAME}"
-node build/JourneyInfoApp.js Db trip "1|316017|0|80|21042020" | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-FROM=Berlin
-TO=Paris
-NAME=${FROM}Nach${TO}
-echo "journeys ${FROM} ${TO}"
-node build/JourneyInfoApp.js Db journeys ${FROM} ${TO} | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-FROM=Berlin
-TO=London
-NAME=${FROM}Nach${TO}
-echo "journeys ${FROM} ${TO}"
-node build/JourneyInfoApp.js Db journeys ${FROM} ${TO} | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-FROM=Berlin
-TO=Moskau
-NAME=${FROM}Nach${TO}
-echo "journeys ${FROM} ${TO}"
-node build/JourneyInfoApp.js Db journeys ${FROM} ${TO} | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
-
-FROM="Berlin(Hbf)"
-TO=Hannover
-NAME=${FROM}Nach${TO}
-echo "journeys Sncb ${FROM} ${TO}"
-node build/JourneyInfoApp.js Sncb journeys "${FROM}" "${TO}" | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
+./scripts/runtest Bvg journeys Alexanderplatz OsloerStr
+./scripts/runtest Db journeys Berlin Paris
+./scripts/runtest Db journeys Berlin London
+./scripts/runtest Db journeys Berlin Moskau
+./scripts/runtest Nahsh journeys Husum Flenburg
+./scripts/runtest Oebb journeys Berlin Wien
+./scripts/runtest Pkp journeys Berlin Warschau
+./scripts/runtest Sncb journeys Hannover Brüssel

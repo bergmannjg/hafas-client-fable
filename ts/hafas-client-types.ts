@@ -25,11 +25,15 @@ export interface Products {
     subway?: boolean,
     tram?: boolean,
     taxi?: boolean,
+    metro?: boolean,
+    interregional?: boolean,
+    onCall?: boolean,
     "high-speed-train"?: boolean,
     "intercity-p"?: boolean,
     "local-train"?: boolean,
-    metro?: boolean,
     "s-train"?: boolean,
+    "long-distance-train"?: boolean,
+    "regional-train"?: boolean
 }
 
 export interface Station {
@@ -39,6 +43,7 @@ export interface Station {
     station?: Station,
     location?: Location,
     products?: Products,
+    isMeta?: boolean,
     regions?: string[] // region ids
 }
 
@@ -48,7 +53,8 @@ export interface Stop {
     station?: Station,
     name: string,
     location?: Location,
-    products: Products
+    products: Products,
+    isMeta?: boolean
 }
 
 export interface Region {
@@ -60,8 +66,8 @@ export interface Region {
 
 export interface Line {
     type: 'line',
-    id: string,
-    name: string,
+    id?: string,
+    name?: string,
     adminCode?: string,
     fahrtNr?: string,
     additionalName?: string,
@@ -69,7 +75,12 @@ export interface Line {
     public?: boolean,
     mode: 'train' | 'bus' | 'watercraft' | 'taxi' | 'gondola' | 'aircraft' | 'car' | 'bicycle' | 'walking',
     routes?: string[] // routes ids
-    operator?: Operator
+    operator?: Operator,
+    express?: boolean,
+    metro?: boolean,
+    night?: boolean,
+    nr?: number,
+    symbol?: string
 }
 
 export interface Route {
@@ -78,6 +89,12 @@ export interface Route {
     line: string,
     mode: 'train' | 'bus' | 'watercraft' | 'taxi' | 'gondola' | 'aircraft' | 'car' | 'bicycle' | 'walking',
     stops: string[] // stop ids
+}
+
+export interface Cycle {
+    min?: number,
+    max?: number,
+    nr?: number,
 }
 
 export interface ArrivalDeparture {
@@ -149,11 +166,19 @@ export interface Price {
     hint?: string
 }
 
+export interface Alternative {
+    direction?: string,
+    line?: Line,
+    plannedWhen?: string,
+    tripId: string,
+    when?: string
+}
+
 export interface Leg {
     tripId?: string,
     origin: Station | Stop,
     destination: Station | Stop,
-    departure: string,
+    departure?: string,
     plannedDeparture: string,
     departureDelay?: number,
     departurePlatform?: string,
@@ -175,7 +200,9 @@ export interface Leg {
     loadFactor?: string,
     distance?: number,
     public?: boolean,
-    transfer?: boolean
+    transfer?: boolean,
+    cycle?: Cycle,
+    alternatives?: Alternative[]
 }
 
 export interface Journey {
@@ -183,7 +210,8 @@ export interface Journey {
     legs: Leg[],
     refreshToken?: string,
     remarks?: Hint[],
-    price?: Price
+    price?: Price,
+    cycle?: Cycle
 }
 
 export interface Journeys {
@@ -279,7 +307,7 @@ export interface HafasClient {
     trip: (id: string, name: string, options: TripOptions | undefined) => Promise<Trip>
     departures: (station: string | Station, options: DeparturesArrivalsOptions | undefined) => Promise<Journeys>,
     arrivals: (station: string | Station, options: DeparturesArrivalsOptions | undefined) => Promise<Journeys>,
-    locations: (from: string, options: LocationsOptions | undefined) => Promise<(Stop | Location)[]>,
+    locations: (from: string, options: LocationsOptions | undefined) => Promise<(Station | Stop | Location)[]>,
     stop: (id: string, options: StopOptions | undefined) => Promise<Stop>
     nearBy: (location: Location, options: NearByOptions | undefined) => Promise<Stop>
     reachableFrom: (address: Location, options: ReachableFromOptions | undefined) => Promise<Duration[]>

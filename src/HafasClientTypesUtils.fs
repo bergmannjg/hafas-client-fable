@@ -10,10 +10,11 @@ let (|Station|Stop|) (obj: U2<Station, Stop>): Choice<Station, Stop> =
     | "stop" -> Stop(unbox obj)
     | unkown -> failwithf "Unkown ``type`` value: `%s`" unkown
 
-let (|Stop|Location|) (obj: U2<Stop, Location>): Choice<Stop, Location> =
+let (|Station|Stop|Location|) (obj: U3<Station, Stop, Location>): Choice<Station, Stop, Location> =
     match obj?``type`` with
     | "location" -> Location(unbox obj)
     | "stop" -> Stop(unbox obj)
+    | "station" -> Station(unbox obj)
     | unkown -> failwithf "Unkown ``type`` value: `%s`" unkown
 
 let locationOptions results = jsOptions<LocationsOptions> (fun x -> x.results <- Some(float results))

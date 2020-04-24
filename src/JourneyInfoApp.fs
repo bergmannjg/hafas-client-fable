@@ -11,7 +11,7 @@ let printLocations (client: HafasClient) name =
         let! stopsOrLocations = client.locations name (Some defaultLocationOptions)
         let json1 = Json.stringify stopsOrLocations
         printfn "%s" json1
-        let json2 = SimpleJson.toString (HafasClientTypesDump.dumpU2StopsLocations stopsOrLocations)
+        let json2 = SimpleJson.toString (HafasClientTypesDump.dumpU3StationsStopsLocations stopsOrLocations)
         printfn "%s" json2
     }
     |> ignore
@@ -24,6 +24,7 @@ let printReachableFrom (client: HafasClient) name =
                 match stations.[0] with
                 | Location location -> Some location
                 | Stop stop -> stop.location
+                | Station station -> station.location
             match location with
             | Some location ->
                 location.address <- Some "dummy"
@@ -93,10 +94,15 @@ let printTrip (client: HafasClient) tripId =
 let main argv =
     let profile =
         match argv.[0] with
+        | "Bvg" -> Some Profile.Bvg
         | "Db" -> Some Profile.Db
         | "Cfl" -> Some Profile.Cfl
-        | "Vbb" -> Some Profile.Vbb
+        | "Insa" -> Some Profile.Insa
+        | "Nahsh" -> Some Profile.Nahsh
+        | "Oebb" -> Some Profile.Oebb
+        | "Pkp" -> Some Profile.Pkp
         | "Sncb" -> Some Profile.Sncb
+        | "Vbb" -> Some Profile.Vbb
         | _ -> None
 
     match profile with

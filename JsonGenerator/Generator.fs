@@ -23,6 +23,7 @@ let generateDumpFunction (ty: Type) =
         match name with
         | "type" -> "``"
         | "public" -> "``"
+        | "when" -> "``"
         | SpecialChars name -> "``"
         | _ -> ""
 
@@ -67,7 +68,10 @@ let generateDumpFunction (ty: Type) =
         then getArrayValueStmt prop g.GenericTypeArguments.[0] varName
         else if g.Name = "LineMode" // todo
         then "JString (" + varName + ".ToString())\n"
-        else (getFormat g.Name) + " " + varName + "\n"
+        else 
+            let ft = (getFormat g.Name)
+            if ft = "JString" then ft + " (escapeString " + varName + ")\n"
+            else ft + " " + varName + "\n"
 
 
     let getOptionTypeSomeStmt (prop: PropertyInfo) (g: Type) =

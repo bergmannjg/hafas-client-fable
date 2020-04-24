@@ -21,26 +21,38 @@ check_files () {
     diff -I ": null" xx00${NAME}-x.json xx01${NAME}-x.json
 }
 
-if [ $# -ne 3 ]
+if [ $# -lt 3 ]
 then
-    echo "$0 profile from to"
+    echo "3 or more args needed"
     exit 1
 fi
-
-if [ $1 != 'Db' ] && [ $1 != 'Vbb' ] && [ $1 != 'Sncb' ]
-then
-    echo "profile is Db|Sncb|Vbb"
-    exit 1
-fi
-
-rm -f xx*.json
 
 PROFILE=$1
-FROM=$2
-TO=$3
-NAME=${FROM}Nach${TO}
-NAME=$(echo $NAME | sed 's/ //g')
-echo "journeys ${PROFILE} ${FROM} ${TO}"
-node build/JourneyInfoApp.js ${PROFILE} journeys "${FROM}" "${TO}" | csplit -sb "%02d${NAME}.json" - 2
-check_files $NAME
+CMD=$2
+X=$3
+
+if [ $# -eq 3 ]
+then
+    NAME=${PROFILE}-${CMD}-${X}
+    NAME=$(echo $NAME | sed 's/ //g')
+    rm -f xx*${NAME}*.json
+    rm -f ./out/xx*${NAME}*.json
+    echo "${PROFILE} ${CMD} ${X}"
+    node ./build/JourneyInfoApp.js ${PROFILE} ${CMD} ${X} | csplit -sb "%02d${NAME}.json" - 2
+    check_files $NAME && echo "Success"
+    mv xx*.json ./out
+fi
+
+if [ $# -eq 4 ]
+then
+    Y=$4
+    NAME=${PROFILE}-${CMD}-${X}-${Y}
+    NAME=$(echo $NAME | sed 's/ //g')
+    rm -f xx*${NAME}*.json
+    rm -f ./out/xx*${NAME}*.json
+    echo "${PROFILE} ${CMD} ${X} ${Y}"
+    node ./build/JourneyInfoApp.js ${PROFILE} ${CMD} ${X} ${Y} | csplit -sb "%02d${NAME}.json" - 2
+    check_files $NAME && echo "Success"
+    mv xx*.json ./out
+fi
 

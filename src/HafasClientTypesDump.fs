@@ -5,6 +5,7 @@ open HafasClientTypes
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.SimpleJson
+open System.Text
 
 //  obj?``type``
 let (|Station|_|)  obj = 
@@ -15,17 +16,29 @@ let (|Stop|_|)  obj =
 
 let (|Location|_|)  obj = 
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
+
+let escapeString (str : string) =
+   if str <> null && str.Contains "\"" then
+       let buf = StringBuilder(str.Length)
+       let replaceOrLeave c =
+          match c with
+          | '"' -> buf.Append "\\\""
+          | _ -> buf.Append c
+       str.ToCharArray() |> Array.iter (replaceOrLeave >> ignore)
+       buf.ToString()
+    else
+        str
  
 let dumpLocation (x: Location) =
     [
-    "type",JString x.``type``
+    "type",JString (escapeString x.``type``)
     "id",
     match x.id with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "name",
     match x.name with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "poi",
     match x.poi with
@@ -33,7 +46,7 @@ let dumpLocation (x: Location) =
         | None -> JNull
     "address",
     match x.address with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "longitude",
     match x.longitude with
@@ -97,6 +110,18 @@ let dumpProducts (x: Products) =
     match x.taxi with
         | Some v -> JBool  v
         | None -> JNull
+    "metro",
+    match x.metro with
+        | Some v -> JBool  v
+        | None -> JNull
+    "interregional",
+    match x.interregional with
+        | Some v -> JBool  v
+        | None -> JNull
+    "onCall",
+    match x.onCall with
+        | Some v -> JBool  v
+        | None -> JNull
     "high-speed-train",
     match x?``high-speed-train`` with
         | Some v -> JBool  v
@@ -109,12 +134,16 @@ let dumpProducts (x: Products) =
     match x?``local-train`` with
         | Some v -> JBool  v
         | None -> JNull
-    "metro",
-    match x.metro with
-        | Some v -> JBool  v
-        | None -> JNull
     "s-train",
     match x?``s-train`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "long-distance-train",
+    match x?``long-distance-train`` with
+        | Some v -> JBool  v
+        | None -> JNull
+    "regional-train",
+    match x?``regional-train`` with
         | Some v -> JBool  v
         | None -> JNull
     ]
@@ -123,9 +152,9 @@ let dumpProducts (x: Products) =
 
 let rec dumpStation (x: Station) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "name",JString x.name
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
+    "name",JString (escapeString x.name)
     "station",
     match x.station with
         | Some v -> dumpStation v
@@ -138,6 +167,10 @@ let rec dumpStation (x: Station) =
     match x.products with
         | Some v -> dumpProducts v
         | None -> JNull
+    "isMeta",
+    match x.isMeta with
+        | Some v -> JBool  v
+        | None -> JNull
     "regions",
     match x.regions with
         | Some v -> JArray [ for e in v do yield JString e]
@@ -148,27 +181,31 @@ let rec dumpStation (x: Station) =
 
 let dumpStop (x: Stop) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
     "station",
     match x.station with
         | Some v -> dumpStation v
         | None -> JNull
-    "name",JString x.name
+    "name",JString (escapeString x.name)
     "location",
     match x.location with
         | Some v -> dumpLocation v
         | None -> JNull
     "products",dumpProducts x.products
+    "isMeta",
+    match x.isMeta with
+        | Some v -> JBool  v
+        | None -> JNull
     ]
     |> Map.ofList
     |> JObject
 
 let dumpRegion (x: Region) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "name",JString x.name
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
+    "name",JString (escapeString x.name)
     "stations",JArray [ for e in x.stations do yield JString e]
     ]
     |> Map.ofList
@@ -176,33 +213,39 @@ let dumpRegion (x: Region) =
 
 let dumpOperator (x: Operator) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "name",JString x.name
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
+    "name",JString (escapeString x.name)
     ]
     |> Map.ofList
     |> JObject
 
 let dumpLine (x: Line) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "name",JString x.name
+    "type",JString (escapeString x.``type``)
+    "id",
+    match x.id with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
+    "name",
+    match x.name with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
     "adminCode",
     match x.adminCode with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "fahrtNr",
     match x.fahrtNr with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "additionalName",
     match x.additionalName with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "product",
     match x.product with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "public",
     match x.``public`` with
@@ -217,17 +260,55 @@ let dumpLine (x: Line) =
     match x.operator with
         | Some v -> dumpOperator v
         | None -> JNull
+    "express",
+    match x.express with
+        | Some v -> JBool  v
+        | None -> JNull
+    "metro",
+    match x.metro with
+        | Some v -> JBool  v
+        | None -> JNull
+    "night",
+    match x.night with
+        | Some v -> JBool  v
+        | None -> JNull
+    "nr",
+    match x.nr with
+        | Some v -> JNumber  v
+        | None -> JNull
+    "symbol",
+    match x.symbol with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
     ]
     |> Map.ofList
     |> JObject
 
 let dumpRoute (x: Route) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "line",JString x.line
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
+    "line",JString (escapeString x.line)
     "mode",JString (x.mode.ToString())
     "stops",JArray [ for e in x.stops do yield JString e]
+    ]
+    |> Map.ofList
+    |> JObject
+
+let dumpCycle (x: Cycle) =
+    [
+    "min",
+    match x.min with
+        | Some v -> JNumber  v
+        | None -> JNull
+    "max",
+    match x.max with
+        | Some v -> JNumber  v
+        | None -> JNull
+    "nr",
+    match x.nr with
+        | Some v -> JNumber  v
+        | None -> JNull
     ]
     |> Map.ofList
     |> JObject
@@ -248,9 +329,9 @@ let dumpArrivalDeparture (x: ArrivalDeparture) =
 
 let dumpSchedule (x: Schedule) =
     [
-    "type",JString x.``type``
-    "id",JString x.id
-    "route",JString x.route
+    "type",JString (escapeString x.``type``)
+    "id",JString (escapeString x.id)
+    "route",JString (escapeString x.route)
     "mode",JString (x.mode.ToString())
     "sequence",JArray [ for e in x.sequence do yield dumpArrivalDeparture e]
     "starts",JArray [ for e in x.starts do yield JString e]
@@ -260,13 +341,13 @@ let dumpSchedule (x: Schedule) =
 
 let dumpHint (x: Hint) =
     [
-    "type",JString x.``type``
-    "code",JString x.code
+    "type",JString (escapeString x.``type``)
+    "code",JString (escapeString x.code)
     "summary",
     match x.summary with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
-    "text",JString x.text
+    "text",JString (escapeString x.text)
     ]
     |> Map.ofList
     |> JObject
@@ -276,7 +357,7 @@ let dumpStopOver (x: StopOver) =
     "stop", match x.stop with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull 
     "departure",
     match x.departure with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "departureDelay",
     match x.departureDelay with
@@ -284,19 +365,19 @@ let dumpStopOver (x: StopOver) =
         | None -> JNull
     "plannedDeparture",
     match x.plannedDeparture with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "departurePlatform",
     match x.departurePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "plannedDeparturePlatform",
     match x.plannedDeparturePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "arrival",
     match x.arrival with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "arrivalDelay",
     match x.arrivalDelay with
@@ -304,15 +385,15 @@ let dumpStopOver (x: StopOver) =
         | None -> JNull
     "plannedArrival",
     match x.plannedArrival with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "arrivalPlatform",
     match x.arrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "plannedArrivalPlatform",
     match x.plannedArrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "remarks",
     match x.remarks with
@@ -324,32 +405,32 @@ let dumpStopOver (x: StopOver) =
 
 let dumpTrip (x: Trip) =
     [
-    "id",JString x.id
+    "id",JString (escapeString x.id)
     "origin",dumpStop x.origin
-    "departure",JString x.departure
+    "departure",JString (escapeString x.departure)
     "departurePlatform",
     match x.departurePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
-    "plannedDeparture",JString x.plannedDeparture
+    "plannedDeparture",JString (escapeString x.plannedDeparture)
     "plannedDeparturePlatform",
     match x.plannedDeparturePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "departureDelay",
     match x.departureDelay with
         | Some v -> JNumber  v
         | None -> JNull
     "destination",dumpStop x.destination
-    "arrival",JString x.arrival
+    "arrival",JString (escapeString x.arrival)
     "arrivalPlatform",
     match x.arrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
-    "plannedArrival",JString x.plannedArrival
+    "plannedArrival",JString (escapeString x.plannedArrival)
     "plannedArrivalPlatform",
     match x.plannedArrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "arrivalDelay",
     match x.arrivalDelay with
@@ -366,7 +447,7 @@ let dumpTrip (x: Trip) =
         | None -> JNull
     "direction",
     match x.direction with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "reachable",
     match x.reachable with
@@ -379,10 +460,33 @@ let dumpTrip (x: Trip) =
 let dumpPrice (x: Price) =
     [
     "amount",JNumber  x.amount
-    "currency",JString x.currency
+    "currency",JString (escapeString x.currency)
     "hint",
     match x.hint with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
+        | None -> JNull
+    ]
+    |> Map.ofList
+    |> JObject
+
+let dumpAlternative (x: Alternative) =
+    [
+    "direction",
+    match x.direction with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
+    "line",
+    match x.line with
+        | Some v -> dumpLine v
+        | None -> JNull
+    "plannedWhen",
+    match x.plannedWhen with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
+    "tripId",JString (escapeString x.tripId)
+    "when",
+    match x.``when`` with
+        | Some v -> JString (escapeString v)
         | None -> JNull
     ]
     |> Map.ofList
@@ -392,40 +496,43 @@ let dumpLeg (x: Leg) =
     [
     "tripId",
     match x.tripId with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "origin", match x.origin with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull 
     "destination", match x.destination with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull 
-    "departure",JString x.departure
-    "plannedDeparture",JString x.plannedDeparture
+    "departure",
+    match x.departure with
+        | Some v -> JString (escapeString v)
+        | None -> JNull
+    "plannedDeparture",JString (escapeString x.plannedDeparture)
     "departureDelay",
     match x.departureDelay with
         | Some v -> JNumber  v
         | None -> JNull
     "departurePlatform",
     match x.departurePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "plannedDeparturePlatform",
     match x.plannedDeparturePlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "arrival",
     match x.arrival with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
-    "plannedArrival",JString x.plannedArrival
+    "plannedArrival",JString (escapeString x.plannedArrival)
     "arrivalDelay",
     match x.arrivalDelay with
         | Some v -> JNumber  v
         | None -> JNull
     "arrivalPlatform",
     match x.arrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "plannedArrivalPlatform",
     match x.plannedArrivalPlatform with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "stopovers",
     match x.stopovers with
@@ -445,7 +552,7 @@ let dumpLeg (x: Leg) =
         | None -> JNull
     "direction",
     match x.direction with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "line",
     match x.line with
@@ -465,7 +572,7 @@ let dumpLeg (x: Leg) =
         | None -> JNull
     "loadFactor",
     match x.loadFactor with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "distance",
     match x.distance with
@@ -479,17 +586,25 @@ let dumpLeg (x: Leg) =
     match x.transfer with
         | Some v -> JBool  v
         | None -> JNull
+    "cycle",
+    match x.cycle with
+        | Some v -> dumpCycle v
+        | None -> JNull
+    "alternatives",
+    match x.alternatives with
+        | Some v -> JArray [ for e in v do yield dumpAlternative e]
+        | None -> JNull
     ]
     |> Map.ofList
     |> JObject
 
 let dumpJourney (x: Journey) =
     [
-    "type",JString x.``type``
+    "type",JString (escapeString x.``type``)
     "legs",JArray [ for e in x.legs do yield dumpLeg e]
     "refreshToken",
     match x.refreshToken with
-        | Some v -> JString v
+        | Some v -> JString (escapeString v)
         | None -> JNull
     "remarks",
     match x.remarks with
@@ -498,6 +613,10 @@ let dumpJourney (x: Journey) =
     "price",
     match x.price with
         | Some v -> dumpPrice v
+        | None -> JNull
+    "cycle",
+    match x.cycle with
+        | Some v -> dumpCycle v
         | None -> JNull
     ]
     |> Map.ofList
@@ -531,4 +650,14 @@ let dumpU2StopsLocations (stops: ResizeArray<U2<Stop, Location>>) =
                   | Location location -> dumpLocation location
                   | Stop stop -> dumpStop stop
                   | _ -> JNull ]
+
+let dumpU3StationsStopsLocations (stops: ResizeArray<U3<Station, Stop, Location>>) =
+    JArray
+        [ for e in stops do
+            yield match e with
+                  | Location location -> dumpLocation location
+                  | Stop stop -> dumpStop stop
+                  | Station station -> dumpStation station
+                  | _ -> JNull ]
+
 

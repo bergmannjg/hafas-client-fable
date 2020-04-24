@@ -20,6 +20,7 @@ The F# App is compiled to Javasrcipt with [fable-splitter](https://www.npmjs.com
 * install [node.js](https://nodejs.org/en/)
 * npm init
 * generate F# types: **ts2fable ./ts/hafas-client-types.ts ./src/HafasClientTypes.fs**
+* generate dump functions: **dotnet run -p JsonGenerator/JsonGenerator.fsproj > src/HafasClientTypesDump.fs**
 * compile F# to JavaScript: **fable-splitter src -o build --commonjs**
 * run JavaScript program: **node build/JourneyInfoApp.js Db journeys Berlin Paris**
 

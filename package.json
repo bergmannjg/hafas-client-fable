@@ -9,7 +9,9 @@
     "fable-compiler": "^2.4.18",
     "fable-loader": "^2.1.8",
     "fable-splitter": "^2.1.12",
-    "hafas-client": "^5.5.0",
+    "hafas-client": "^5.5.0"
+ },
+  "devDependencies": {
     "ts2fable": "^0.7.1"
-  }
+   }
 }
