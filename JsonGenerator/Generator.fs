@@ -90,7 +90,7 @@ let generateDumpFunction (ty: Type) =
         | "FSharpOption`1" -> getOptionTypeStmt prop genericTypes.[0]
         | "U2`2" when genericTypes.[0].Name = "Station" && genericTypes.[1].Name = "Stop" ->
             (getU2StationStopStmt ("x." + prop.Name) + "\n")
-        | "List`1" -> getArrayValueStmt prop genericTypes.[0] ("x." + prop.Name)
+        | "List`1" | "IReadOnlyList`1" -> getArrayValueStmt prop genericTypes.[0] ("x." + prop.Name)
         | _ -> tab + "\"" + prop.Name + "\": JString \"undefined\"\n"
 
     let getStmtsOfProp (prop: PropertyInfo) =

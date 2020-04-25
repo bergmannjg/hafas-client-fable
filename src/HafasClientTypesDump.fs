@@ -28,6 +28,14 @@ let escapeString (str : string) =
        buf.ToString()
     else
         str
+
+let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys(o)
+
+let dumpProducts (x: Products) =
+    let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json
+    |> Map.ofList
+    |> JObject
  
 let dumpLocation (x: Location) =
     [
@@ -59,92 +67,6 @@ let dumpLocation (x: Location) =
     "altitude",
     match x.altitude with
         | Some v -> JNumber  v
-        | None -> JNull
-    ]
-    |> Map.ofList
-    |> JObject
-
-let dumpProducts (x: Products) =
-    [
-    "nationalExpress",
-    match x.nationalExpress with
-        | Some v -> JBool  v
-        | None -> JNull
-    "national",
-    match x.national with
-        | Some v -> JBool  v
-        | None -> JNull
-    "regionalExp",
-    match x.regionalExp with
-        | Some v -> JBool  v
-        | None -> JNull
-    "regional",
-    match x.regional with
-        | Some v -> JBool  v
-        | None -> JNull
-    "suburban",
-    match x.suburban with
-        | Some v -> JBool  v
-        | None -> JNull
-    "bus",
-    match x.bus with
-        | Some v -> JBool  v
-        | None -> JNull
-    "express",
-    match x.express with
-        | Some v -> JBool  v
-        | None -> JNull
-    "ferry",
-    match x.ferry with
-        | Some v -> JBool  v
-        | None -> JNull
-    "subway",
-    match x.subway with
-        | Some v -> JBool  v
-        | None -> JNull
-    "tram",
-    match x.tram with
-        | Some v -> JBool  v
-        | None -> JNull
-    "taxi",
-    match x.taxi with
-        | Some v -> JBool  v
-        | None -> JNull
-    "metro",
-    match x.metro with
-        | Some v -> JBool  v
-        | None -> JNull
-    "interregional",
-    match x.interregional with
-        | Some v -> JBool  v
-        | None -> JNull
-    "onCall",
-    match x.onCall with
-        | Some v -> JBool  v
-        | None -> JNull
-    "high-speed-train",
-    match x?``high-speed-train`` with
-        | Some v -> JBool  v
-        | None -> JNull
-    "intercity-p",
-    match x?``intercity-p`` with
-        | Some v -> JBool  v
-        | None -> JNull
-    "local-train",
-    match x?``local-train`` with
-        | Some v -> JBool  v
-        | None -> JNull
-    "s-train",
-    match x?``s-train`` with
-        | Some v -> JBool  v
-        | None -> JNull
-    "long-distance-train",
-    match x?``long-distance-train`` with
-        | Some v -> JBool  v
-        | None -> JNull
-    "regional-train",
-    match x?``regional-train`` with
-        | Some v -> JBool  v
         | None -> JNull
     ]
     |> Map.ofList

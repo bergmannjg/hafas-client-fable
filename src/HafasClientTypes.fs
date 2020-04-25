@@ -4,6 +4,8 @@ open System
 open Fable.Core
 open Fable.Core.JS
 
+type ReadonlyArray<'T> = System.Collections.Generic.IReadOnlyList<'T>
+
 
 type [<AllowNullLiteral>] IExports =
     abstract createClient: profile: obj * userAgent: string -> HafasClient
@@ -19,26 +21,112 @@ type [<AllowNullLiteral>] Location =
     abstract altitude: float option with get, set
 
 type [<AllowNullLiteral>] Products =
-    abstract nationalExpress: bool option with get, set
-    abstract national: bool option with get, set
-    abstract regionalExp: bool option with get, set
-    abstract regional: bool option with get, set
-    abstract suburban: bool option with get, set
-    abstract bus: bool option with get, set
-    abstract express: bool option with get, set
-    abstract ferry: bool option with get, set
-    abstract subway: bool option with get, set
-    abstract tram: bool option with get, set
-    abstract taxi: bool option with get, set
-    abstract metro: bool option with get, set
-    abstract interregional: bool option with get, set
-    abstract onCall: bool option with get, set
-    abstract ``high-speed-train``: bool option with get, set
-    abstract ``intercity-p``: bool option with get, set
-    abstract ``local-train``: bool option with get, set
-    abstract ``s-train``: bool option with get, set
-    abstract ``long-distance-train``: bool option with get, set
-    abstract ``regional-train``: bool option with get, set
+    [<Emit "$0[$1]{{=$2}}">] abstract Item: product: string -> bool with get, set
+
+type [<AllowNullLiteral>] ProductsBvg =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract express: bool with get, set
+    abstract ferry: bool with get, set
+    abstract regional: bool with get, set
+    abstract suburban: bool with get, set
+    abstract subway: bool with get, set
+    abstract tram: bool with get, set
+
+type [<AllowNullLiteral>] ProductsDb =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ferry: bool with get, set
+    abstract national: bool with get, set
+    abstract nationalExpress: bool with get, set
+    abstract regional: bool with get, set
+    abstract regionalExp: bool with get, set
+    abstract suburban: bool with get, set
+    abstract subway: bool with get, set
+    abstract taxi: bool with get, set
+    abstract tram: bool with get, set
+
+type [<AllowNullLiteral>] ProductsHvv =
+    inherit Products
+    abstract akn: bool with get, set
+    abstract ``anruf-sammel-taxi``: bool with get, set
+    abstract bus: bool with get, set
+    abstract ``express-bus``: bool with get, set
+    abstract ferry: bool with get, set
+    abstract ``long-distance-bus``: bool with get, set
+    abstract ``long-distance-train``: bool with get, set
+    abstract ``regional-express-train``: bool with get, set
+    abstract ``regional-train``: bool with get, set
+    abstract suburban: bool with get, set
+    abstract subway: bool with get, set
+
+type [<AllowNullLiteral>] ProductsInsa =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract national: bool with get, set
+    abstract nationalExpress: bool with get, set
+    abstract regional: bool with get, set
+    abstract suburban: bool with get, set
+    abstract tourismTrain: bool with get, set
+    abstract tram: bool with get, set
+
+type [<AllowNullLiteral>] ProductsNahsh =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ferry: bool with get, set
+    abstract interregional: bool with get, set
+    abstract national: bool with get, set
+    abstract nationalExpress: bool with get, set
+    abstract onCall: bool with get, set
+    abstract regional: bool with get, set
+    abstract suburban: bool with get, set
+    abstract subway: bool with get, set
+    abstract tram: bool with get, set
+
+type [<AllowNullLiteral>] ProductsOebb =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ferry: bool with get, set
+    abstract interregional: bool with get, set
+    abstract national: bool with get, set
+    abstract nationalExpress: bool with get, set
+    abstract onCall: bool with get, set
+    abstract regional: bool with get, set
+    abstract suburban: bool with get, set
+    abstract subway: bool with get, set
+    abstract tram: bool with get, set
+
+type [<AllowNullLiteral>] ProductsPkp =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ``high-speed-train``: bool with get, set
+    abstract ``long-distance-train``: bool with get, set
+    abstract ``regional-train``: bool with get, set
+
+type [<AllowNullLiteral>] ProductsRsag =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ferry: bool with get, set
+    abstract ``ic-ec``: bool with get, set
+    abstract ice: bool with get, set
+    abstract ``long-distance-train``: bool with get, set
+    abstract ``on-call``: bool with get, set
+    abstract ``regional-train``: bool with get, set
+    abstract ``s-bahn``: bool with get, set
+    abstract tram: bool with get, set
+    abstract ``u-bahn``: bool with get, set
+
+type [<AllowNullLiteral>] ProductsSBahnMunich =
+    inherit Products
+    abstract bus: bool with get, set
+    abstract ``ic-ec``: bool with get, set
+    abstract ice: bool with get, set
+    abstract ``ir-d``: bool with get, set
+    abstract ``on-call``: bool with get, set
+    abstract region: bool with get, set
+    abstract sbahn: bool with get, set
+    abstract tram: bool with get, set
+    abstract ubahn: bool with get, set
 
 type [<AllowNullLiteral>] Station =
     abstract ``type``: string with get, set
@@ -207,7 +295,7 @@ type [<AllowNullLiteral>] Journeys =
 
 type [<AllowNullLiteral>] Duration =
     abstract duration: float with get, set
-    abstract stations: ResizeArray<U2<Station, Stop>> with get, set
+    abstract stations: ReadonlyArray<U2<Station, Stop>> with get, set
 
 type [<AllowNullLiteral>] JourneysOptions =
     abstract departure: DateTime option with get, set
@@ -293,24 +381,25 @@ type [<AllowNullLiteral>] HafasClient =
 type [<StringEnum>] [<RequireQualifiedAccess>] Profile =
     | Bvg
     | Cmta
-    | DbBusradarNrw
-    | Insa
-    | Nahsh
-    | Oebb
-    | Rsag
-    | SBahnMunich
-    | Vbb
-    | Vmt
     | Cfl
     | Db
+    | DbBusradarNrw
     | Hvv
+    | Insa
     | Invg
+    | Nahsh
     | Nvv
+    | Oebb
     | Pkp
     | Rmv
-    | Saarfahrplan
+    | Rsag
+    | [<CompiledName "Saarfahrplan">] Saarfahrplan
+    | SBahnMunich
     | Sncb
+    | Svv
+    | Vbb
     | Vbn
+    | Vmt
     | Vsn
 
 type [<StringEnum>] [<RequireQualifiedAccess>] LineMode =

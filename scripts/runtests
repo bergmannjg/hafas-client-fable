@@ -2,9 +2,13 @@
 
 ./scripts/runtest Bvg locations Alexanderplatz
 ./scripts/runtest Db locations Hannover
+./scripts/runtest Hvv locations Dammtor
+./scripts/runtest Insa locations Magdeburg
 ./scripts/runtest Nahsh locations Husum
 ./scripts/runtest Oebb locations Wien
 ./scripts/runtest Pkp locations Warschau
+./scripts/runtest Rsag locations Warnemünde 
+./scripts/runtest SBahnMunich locations Harras
 ./scripts/runtest Vbb locations Alexanderplatz
 
 ./scripts/runtest Db reachableFrom Hannover

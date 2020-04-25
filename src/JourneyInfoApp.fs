@@ -95,14 +95,27 @@ let main argv =
     let profile =
         match argv.[0] with
         | "Bvg" -> Some Profile.Bvg
-        | "Db" -> Some Profile.Db
+        | "Cmta" -> Some Profile.Cmta
         | "Cfl" -> Some Profile.Cfl
+        | "Db" -> Some Profile.Db
+        | "DbBusradarNrw" -> Some Profile.DbBusradarNrw
+        | "Hvv" -> Some Profile.Hvv
         | "Insa" -> Some Profile.Insa
+        | "Invg" -> Some Profile.Invg
         | "Nahsh" -> Some Profile.Nahsh
+        | "Nvv" -> Some Profile.Nvv
         | "Oebb" -> Some Profile.Oebb
         | "Pkp" -> Some Profile.Pkp
+        | "Rmv" -> Some Profile.Rmv
+        | "Rsag" -> Some Profile.Rsag
+        | "Saarfahrplan" -> Some Profile.Saarfahrplan
+        | "SBahnMunich" -> Some Profile.SBahnMunich
+        | "Svv" -> Some Profile.Svv
         | "Sncb" -> Some Profile.Sncb
         | "Vbb" -> Some Profile.Vbb
+        | "Vbn" -> Some Profile.Vbn
+        | "Vmt" -> Some Profile.Vmt
+        | "Vsn" -> Some Profile.Vsn
         | _ -> None
 
     match profile with

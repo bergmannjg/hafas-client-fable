@@ -33,6 +33,14 @@ let escapeString (str : string) =
        buf.ToString()
     else
         str
+
+let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys(o)
+
+let dumpProducts (x: Products) =
+    let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json
+    |> Map.ofList
+    |> JObject
  """
 
 let finale = """
@@ -70,8 +78,8 @@ let dumpU3StationsStopsLocations (stops: ResizeArray<U3<Station, Stop, Location>
 [<EntryPoint>]
 let main argv =
     printfn "%s" intro
+    // type Products has fixed implementation
     Generator.generateDumpFunction typeof<Location>
-    Generator.generateDumpFunction typeof<Products>
     Generator.generateDumpFunction typeof<Station>
     Generator.generateDumpFunction typeof<Stop>
     Generator.generateDumpFunction typeof<Region>
