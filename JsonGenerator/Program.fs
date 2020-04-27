@@ -3,7 +3,7 @@ open System
 open HafasClientTypes
 open Fable.SimpleJson 
 
-let intro =  """// DumpGenerator 0.0.0
+let intro =  """// JsonGenerator 0.0.0
 module HafasClientTypesDump
 
 open HafasClientTypes
@@ -23,7 +23,7 @@ let (|Location|_|)  obj =
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
 let escapeString (str : string) =
-   if str <> null && str.Contains "\"" then
+   if not (isNull str) && str.Contains "\"" then
        let buf = StringBuilder(str.Length)
        let replaceOrLeave c =
           match c with
@@ -38,25 +38,26 @@ let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys
 
 let dumpProducts (x: Products) =
     let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
-    Seq.toList json
-    |> Map.ofList
-    |> JObject
+    Seq.toList json |> Map.ofList |> JObject
  """
 
 let finale = """
-let dumpStations (stations: ResizeArray<Station>) =
+let dumpStations (stations: ReadonlyArray<Station>) =
     JArray [ for e in stations do yield dumpStation e ]
 
-let dumpStops (stops: ResizeArray<Stop>) =
+let dumpStops (stops: ReadonlyArray<Stop>) =
     JArray [ for e in stops do yield dumpStop e ]
 
-let dumpJourneys (journeys: ResizeArray<Journey>) =
+let dumpJourneys (journeys: ReadonlyArray<Journey>) =
     JArray [ for e in journeys do yield dumpJourney e ]
 
-let dumpDurations (durations: ResizeArray<Duration>) =
+let dumpDurations (durations: ReadonlyArray<Duration>) =
     JArray [ for e in durations do yield dumpDuration e ]
 
-let dumpU2StopsLocations (stops: ResizeArray<U2<Stop, Location>>) =
+let dumpAlternatives (alternatives: ReadonlyArray<Alternative>) =
+    JArray [ for e in alternatives do yield dumpAlternative e ]
+
+let dumpU2StopsLocations (stops: ReadonlyArray<U2<Stop, Location>>) =
     JArray
         [ for e in stops do
             yield match e with
@@ -64,7 +65,7 @@ let dumpU2StopsLocations (stops: ResizeArray<U2<Stop, Location>>) =
                   | Stop stop -> dumpStop stop
                   | _ -> JNull ]
 
-let dumpU3StationsStopsLocations (stops: ResizeArray<U3<Station, Stop, Location>>) =
+let dumpU3StationsStopsLocations (stops: ReadonlyArray<U3<Station, Stop, Location>>) =
     JArray
         [ for e in stops do
             yield match e with

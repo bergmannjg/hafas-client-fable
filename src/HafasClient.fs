@@ -2,100 +2,37 @@ module HafasClient
 
 open FSharp.Core
 open Fable.Core
+open Fable.Core.JsInterop
 open HafasClientTypes
+open HafasClientTypesProfile
 
 [<Import("default", "hafas-client")>]
 let createClient (profile: obj) (name: string): HafasClient = jsNative
 
-[<Import("default", "hafas-client/p/bvg")>]
-let bvgProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/cmta")>]
-let cmtaProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/db")>]
-let dbProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/db-busradar-nrw")>]
-let dbbusradarnrwProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/cfl")>]
-let cflProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/hvv")>]
-let hvvProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/insa")>]
-let insaProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/invg")>]
-let invgProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/nahsh")>]
-let nahshProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/nvv")>]
-let nvvProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/oebb")>]
-let oebbProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/pkp")>]
-let pkpProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/rmv")>]
-let rmvProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/rsag")>]
-let rsagProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/saarfahrplan")>]
-let saarfahrplanProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/sncb")>]
-let sncbProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/sbahn-muenchen")>]
-let sMuenchenProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/svv")>]
-let svvProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/vbb")>]
-let vbbProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/vbn")>]
-let vbnProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/vmt")>]
-let vmtProfile: obj = jsNative
-
-[<Import("default", "hafas-client/p/vsn")>]
-let vsnProfile: obj = jsNative
-
 let createHafasClient profile name =
     let p =
         match profile with
-        | Profile.Bvg -> bvgProfile
-        | Profile.Cmta -> cmtaProfile
-        | Profile.Cfl -> cflProfile
-        | Profile.Db -> dbProfile
-        | Profile.DbBusradarNrw -> dbbusradarnrwProfile
-        | Profile.Hvv -> hvvProfile
-        | Profile.Insa -> insaProfile
-        | Profile.Invg -> invgProfile
-        | Profile.Nahsh -> nahshProfile
-        | Profile.Nvv -> nvvProfile
-        | Profile.Oebb -> oebbProfile
-        | Profile.Pkp -> pkpProfile
-        | Profile.Rmv -> rmvProfile
-        | Profile.Rsag -> rsagProfile
-        | Profile.Saarfahrplan -> saarfahrplanProfile
-        | Profile.SBahnMunich -> sMuenchenProfile
-        | Profile.Svv -> svvProfile
-        | Profile.Sncb -> sncbProfile
-        | Profile.Vbb -> vbbProfile
-        | Profile.Vbn -> vbnProfile
-        | Profile.Vmt -> vmtProfile
-        | Profile.Vsn -> vsnProfile
+        | Profile.Bvg -> importDefault "hafas-client/p/bvg"
+        | Profile.Cmta -> importDefault "hafas-client/p/cmta"
+        | Profile.Cfl -> importDefault "hafas-client/p/cfl"
+        | Profile.Db -> importDefault "hafas-client/p/db"
+        | Profile.DbBusradarNrw -> importDefault "hafas-client/p/db-busradar-nrw"
+        | Profile.Hvv -> importDefault "hafas-client/p/hvv"
+        | Profile.Insa -> importDefault "hafas-client/p/insa"
+        | Profile.Invg -> importDefault "hafas-client/p/invg"
+        | Profile.Nahsh -> importDefault "hafas-client/p/nahsh"
+        | Profile.Nvv -> importDefault "hafas-client/p/nvv"
+        | Profile.Oebb -> importDefault "hafas-client/p/oebb"
+        | Profile.Pkp -> importDefault "hafas-client/p/pkp"
+        | Profile.Rmv -> importDefault "hafas-client/p/rmv"
+        | Profile.Rsag -> importDefault "hafas-client/p/rsag"
+        | Profile.Saarfahrplan -> importDefault "hafas-client/p/saarfahrplan"
+        | Profile.SBahnMunich -> importDefault "hafas-client/p/sbahn-muenchen"
+        | Profile.Svv -> importDefault "hafas-client/p/svv"
+        | Profile.Sncb -> importDefault "hafas-client/p/sncb"
+        | Profile.Vbb -> importDefault "hafas-client/p/vbb"
+        | Profile.Vbn -> importDefault "hafas-client/p/vbn"
+        | Profile.Vmt -> importDefault "hafas-client/p/vmt"
+        | Profile.Vsn -> importDefault "hafas-client/p/vsn"
+
     createClient p name

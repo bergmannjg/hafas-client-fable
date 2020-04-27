@@ -11,6 +11,8 @@
 ./scripts/runtest SBahnMunich locations Harras
 ./scripts/runtest Vbb locations Alexanderplatz
 
+./scripts/runtest Db departures 8000152
+
 ./scripts/runtest Db reachableFrom Hannover
 
 ./scripts/runtest Bvg journeys Alexanderplatz OsloerStr
@@ -20,4 +22,4 @@
 ./scripts/runtest Nahsh journeys Husum Flenburg
 ./scripts/runtest Oebb journeys Berlin Wien
 ./scripts/runtest Pkp journeys Berlin Warschau
-./scripts/runtest Sncb journeys Hannover Brüssel
+./scripts/runtest Sncb journeys Antwerpen Brüssel

@@ -4,6 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="HafasClientTypes.fs" />
+    <Compile Include="HafasClientTypesProfile.fs" />
+    <Compile Include="HafasClientTypesProducts.fs" />
     <Compile Include="HafasClient.fs" />
     <Compile Include="HafasClientTypesDump.fs" />
     <Compile Include="HafasClientTypesUtils.fs" />
@@ -14,5 +16,6 @@
     <PackageReference Include="Fable.Promise" Version="2.0.0" />
     <PackageReference Include="Fable.Fetch" Version="2.2.0" />
     <PackageReference Include="Fable.SimpleJson" Version="3.8.2" />
+    <PackageReference Include="Thoth.Json" Version="4.0.0" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,36 @@
+[
+    {
+        "type": "stop",
+        "id": "900000500032",
+        "name": "Hannover, Hbf",
+        "location": {
+            "type": "location",
+            "id": "900500032",
+            "latitude": 52.376764,
+            "longitude": 9.741017
+        },
+        "products": {
+            "suburban": false,
+            "subway": false,
+            "tram": false,
+            "bus": false,
+            "ferry": false,
+            "express": true,
+            "regional": false
+        }
+    },
+    {
+        "type": "location",
+        "id": null,
+        "latitude": 52.52736,
+        "longitude": 13.3827,
+        "address": "10115 Berlin-Mitte, Hannoversche Str."
+    },
+    {
+        "type": "location",
+        "id": "770056763",
+        "latitude": 52.453739,
+        "longitude": 13.046872,
+        "address": "14476 Potsdam, Hannoversche Str."
+    }
+]

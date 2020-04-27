@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z "$(ls -A ./out)" ]; then
+    echo "directory ./out is empty, please run ./scripts/runtests first"
+    exit 1
+fi
+
+echo 'import { Products } from "./index;"' > ./types/hafas-client/products.d.ts 
+./scripts/getproducttypes >> ./types/hafas-client/products.d.ts 
+
+ts2fable ./types/hafas-client/products.d.ts src/HafasClientTypesProducts.fs 
+
