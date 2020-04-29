@@ -1,25 +1,36 @@
 #!/bin/bash
 
-./scripts/runtest Bvg locations Alexanderplatz
-./scripts/runtest Db locations Hannover
-./scripts/runtest Hvv locations Dammtor
-./scripts/runtest Insa locations Magdeburg
-./scripts/runtest Nahsh locations Husum
-./scripts/runtest Oebb locations Wien
-./scripts/runtest Pkp locations Warschau
-./scripts/runtest Rsag locations Warnemünde 
-./scripts/runtest SBahnMunich locations Harras
-./scripts/runtest Vbb locations Alexanderplatz
+./scripts/runtest Bvg check-locations Alexanderplatz
+./scripts/runtest Cfl check-locations Luxembourg
+./scripts/runtest Cmta check-locations King
+./scripts/runtest Db check-locations Hannover
+./scripts/runtest DbBusradarNrw check-locations Essen
+./scripts/runtest Hvv check-locations Dammtor
+./scripts/runtest Insa check-locations Magdeburg
+./scripts/runtest Invg check-locations Ingolstadt
+./scripts/runtest Nahsh check-locations Husum
+./scripts/runtest Nvv check-locations Nidda
+./scripts/runtest Oebb check-locations Wien
+./scripts/runtest Pkp check-locations Warschau
+./scripts/runtest Rmv check-locations Mainz
+./scripts/runtest Rsag check-locations Warnemünde 
+./scripts/runtest Saarfahrplan check-locations Trier
+./scripts/runtest SBahnMunich check-locations Harras
+ ./scripts/runtest Sncb check-locations Antwerpen
+./scripts/runtest Vbb check-locations Alexanderplatz
+./scripts/runtest Vbn check-locations Thale
+./scripts/runtest Vmt check-locations Suhl
+./scripts/runtest Vsn check-locations Seesen
 
-./scripts/runtest Db departures 8000152
+./scripts/runtest Db check-departures 8000152
 
-./scripts/runtest Db reachableFrom Hannover
+./scripts/runtest Db check-reachableFrom Hannover
 
-./scripts/runtest Bvg journeys Alexanderplatz OsloerStr
-./scripts/runtest Db journeys Berlin Paris
-./scripts/runtest Db journeys Berlin London
-./scripts/runtest Db journeys Berlin Moskau
-./scripts/runtest Nahsh journeys Husum Flenburg
-./scripts/runtest Oebb journeys Berlin Wien
-./scripts/runtest Pkp journeys Berlin Warschau
-./scripts/runtest Sncb journeys Antwerpen Brüssel
+./scripts/runtest Bvg check-journeys Alexanderplatz OsloerStr
+./scripts/runtest Db check-journeys Berlin Paris
+./scripts/runtest Db check-journeys Berlin London
+./scripts/runtest Db check-journeys Berlin Moskau
+./scripts/runtest Nahsh check-journeys Husum Flenburg
+./scripts/runtest Oebb check-journeys Berlin Wien
+./scripts/runtest Pkp check-journeys Berlin Warschau
+./scripts/runtest Sncb check-journeys Antwerpen Brüssel

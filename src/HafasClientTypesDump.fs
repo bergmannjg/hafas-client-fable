@@ -2,6 +2,7 @@
 module HafasClientTypesDump
 
 open HafasClientTypes
+open HafasClientTypes.CreateClient
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.SimpleJson

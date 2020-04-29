@@ -2,7 +2,7 @@ module HafasClientTypesUtils
 
 open Fable.Core
 open Fable.Core.JsInterop
-open HafasClientTypes
+open HafasClientTypes.CreateClient
 
 let (|Station|Stop|) (obj: U2<Station, Stop>): Choice<Station, Stop> =
     match obj?``type`` with

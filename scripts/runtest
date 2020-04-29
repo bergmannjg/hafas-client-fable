@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# the files xx01*.json should be a superset of the corresponding files xx00*.json 
+# test the output of JourneyInfoApp, consisting of 2 json strings (runtime view and compile time view)
 # check it in 4 steps
 # 1) sort with jq
 # 2) remove null values

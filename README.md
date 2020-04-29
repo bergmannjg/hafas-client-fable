@@ -31,7 +31,7 @@ The App prints two json objects:
 * JSon dump of JavaScript object with [JSON.stringify](https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) (runtime view)
 * JSon dump of JavaScript object with generated functions by [JsonGenerator](./JsonGenerator) (compile time view)
 
-Example. usage: **node build/JourneyInfoApp.js Db journeys Berlin Hannover | csplit -b "%02d.json" - 2**
+Example. usage: **node build/JourneyInfoApp.js Db check-journeys Berlin Hannover | csplit -b "%02d.json" - 2**
 
 You can compare the two json files to evaluate the coverage of the TypeScipt declaration file with the hafas-client interface,
 see [runtests](./scripts/runtests)

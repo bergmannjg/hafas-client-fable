@@ -1,0 +1,45 @@
+#!/bin/bash
+# generate test file containing every profile in 'hafas-client/p'
+
+NODEDIR="./node_modules/hafas-client/p"
+
+echo "import createClient = require('hafas-client');"
+echo ""
+
+for filename in $(ls ${NODEDIR}); do
+    if [ -f ${NODEDIR}/${filename}/index.js ]; then 
+        DIRECTORY="./types/hafas-client/p/$filename"
+        PROFILE=$(echo ${filename} | sed 's/-//g')
+        PROFILE="${PROFILE}Profile"
+        echo "import ${PROFILE} = require('hafas-client/p/${filename}');"
+    fi
+done
+
+echo ""
+echo "const choose = (p: string): createClient.Profile => {"
+echo "    switch (p) {"
+
+for filename in $(ls ${NODEDIR}); do
+    if [ -f ${NODEDIR}/${filename}/index.js ]; then 
+        DIRECTORY="./types/hafas-client/p/$filename"
+        PROFILE=$(echo ${filename} | sed 's/-//g')
+        PROFILE="${PROFILE}Profile"
+        echo "        case '${PROFILE}': return ${PROFILE};"
+    fi
+done
+
+cat <<- EOM
+        default: return dbProfile;
+    }
+};
+
+const client: createClient.HafasClient = createClient(choose('dbProfile'), 'client');
+
+client.locations("", { results: 1 })
+    .then(locations => { /* ... */ })
+    .catch(() => { /* ... */ });
+
+client.journeys("", "", { results: 1 })
+    .then(journeys => { /* ... */ })
+    .catch(() => { /* ... */ });
+EOM

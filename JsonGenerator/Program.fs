@@ -1,12 +1,13 @@
 
 open System
-open HafasClientTypes
+open HafasClientTypes.CreateClient
 open Fable.SimpleJson 
 
 let intro =  """// JsonGenerator 0.0.0
 module HafasClientTypesDump
 
 open HafasClientTypes
+open HafasClientTypes.CreateClient
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.SimpleJson
