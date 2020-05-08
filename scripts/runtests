@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [  ! -d "./scripts" ]; then
+    echo "please run from project directory"
+    exit 1
+fi
+
 ./scripts/runtest Bvg check-locations Alexanderplatz
 ./scripts/runtest Cfl check-locations Luxembourg
 ./scripts/runtest Cmta check-locations King
@@ -16,7 +21,7 @@
 ./scripts/runtest Rsag check-locations Warnemünde 
 ./scripts/runtest Saarfahrplan check-locations Trier
 ./scripts/runtest SBahnMunich check-locations Harras
- ./scripts/runtest Sncb check-locations Antwerpen
+./scripts/runtest Sncb check-locations Antwerpen
 ./scripts/runtest Vbb check-locations Alexanderplatz
 ./scripts/runtest Vbn check-locations Thale
 ./scripts/runtest Vmt check-locations Suhl

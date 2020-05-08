@@ -6,8 +6,6 @@ open Fable.Core.JS
 
 type ReadonlyArray<'T> = System.Collections.Generic.IReadOnlyList<'T>
 
-let [<Import("*","hafas-client")>] createClient: IExports = jsNative
-
 type [<AllowNullLiteral>] IExports =
     abstract createClient: profile: CreateClient.Profile * userAgent: string -> CreateClient.HafasClient
 
@@ -22,9 +20,10 @@ module CreateClient =
     type [<AllowNullLiteral>] Profile =
         abstract locale: string with get, set
         abstract products: ReadonlyArray<ProductType> with get, set
-        abstract trip: bool with get, set
-        abstract radar: bool with get, set
-        abstract reachableFrom: bool with get, set
+        abstract trip: bool option with get, set
+        abstract radar: bool option with get, set
+        abstract refreshJourney: bool option with get, set
+        abstract reachableFrom: bool option with get, set
 
     type [<AllowNullLiteral>] Location =
         abstract ``type``: string with get, set

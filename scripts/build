@@ -1,0 +1,23 @@
+#!/bin/bash
+# build JourneyInfoApp and dependent files
+
+if [  ! -d "./scripts" ]; then
+    echo "please run from project directory"
+    exit 1
+fi
+
+indexfile="./types/hafas-client/index.d.ts"
+typefile="./src/HafasClientTypes.fs"
+dumpfile="./src/HafasClientTypesDump.fs"
+
+if [ ! -f ${typefile} ] || [ ${indexfile} -nt ${typefile} ]; then
+    npx ts2fable ${indexfile} ${typefile}
+    # todo: why it is necessary
+    sed -i '/CreateClient.IExports/d' ${typefile} 
+fi
+
+if [ ! -f ${dumpfile} ] || [ ${typefile} -nt ${dumpfile} ]; then
+    dotnet run -p JsonGenerator/JsonGenerator.fsproj > ${dumpfile}
+fi
+
+npx webpack --config src/webpack.config.js 

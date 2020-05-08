@@ -18,15 +18,15 @@ The F# App is compiled to Javasrcipt with [fable-splitter](https://www.npmjs.com
 
 * install [.NET Core SDK](https://dotnet.microsoft.com/download)
 * install [node.js](https://nodejs.org/en/)
-* npm init
-* generate F# types: **ts2fable ./types/hafas-client/index.d.ts ./src/HafasClientTypes.fs**
+* npm install
+* generate F# types: **npx ts2fable ./types/hafas-client/index.d.ts ./src/HafasClientTypes.fs**
 * generate dump functions: **dotnet run -p JsonGenerator/JsonGenerator.fsproj > src/HafasClientTypesDump.fs**
-* compile F# to JavaScript: **fable-splitter src -o build --commonjs**
+* compile F# to JavaScript: **npx webpack --config src/webpack.config.js**
 * run JavaScript program: **node build/JourneyInfoApp.js Db journeys Berlin Paris**
 
 ## Evaluation of TypeScipt declaration file
 
-The App prints two json objects:
+If the check option is enabled, the App prints two json objects:
 
 * JSon dump of JavaScript object with [JSON.stringify](https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) (runtime view)
 * JSon dump of JavaScript object with generated functions by [JsonGenerator](./JsonGenerator) (compile time view)

@@ -5,7 +5,6 @@
   <ItemGroup>
     <Compile Include="HafasClientTypes.fs" />
     <Compile Include="HafasClientTypesProfile.fs" />
-    <Compile Include="HafasClientTypesProducts.fs" />
     <Compile Include="HafasClient.fs" />
     <Compile Include="HafasClientTypesDump.fs" />
     <Compile Include="HafasClientTypesUtils.fs" />
