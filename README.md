@@ -9,7 +9,7 @@ It benefits from the [fable](https://fable.io/) infrastructure to
 
 The connection from hafas-client JavaScript to F# is established in two steps:
 
-* there is a TypeScipt declaration file [hafas-client-types](./types/hafas-client/index.d.ts) for the hafas-client interface,
+* there is a TypeScipt declaration file [hafas-client-types](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/hafas-client/index.d.ts) for the hafas-client interface,
 * the parser [ts2fable](https://www.npmjs.com/package/ts2fable) generates the corresponding F# types.
 
 The F# App is compiled to Javasrcipt with [fable-splitter](https://www.npmjs.com/package/fable-splitter) and can be run with node.js.

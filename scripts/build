@@ -6,7 +6,7 @@ if [  ! -d "./scripts" ]; then
     exit 1
 fi
 
-indexfile="./types/hafas-client/index.d.ts"
+indexfile="./node_modules/@types/hafas-client/index.d.ts"
 typefile="./src/HafasClientTypes.fs"
 dumpfile="./src/HafasClientTypesDump.fs"
 
@@ -20,4 +20,4 @@ if [ ! -f ${dumpfile} ] || [ ${typefile} -nt ${dumpfile} ]; then
     dotnet run -p JsonGenerator/JsonGenerator.fsproj > ${dumpfile}
 fi
 
-npx webpack --config src/webpack.config.js 
+npx fable-splitter -c fable-splitter.config --commonjs
