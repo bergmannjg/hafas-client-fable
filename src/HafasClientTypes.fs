@@ -64,6 +64,10 @@ module CreateClient =
         abstract facilities: Facilities option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
 
+    type [<AllowNullLiteral>] IDs =
+        /// DELFI Haltestellen ID
+        abstract dhid: string option with get, set
+
     type [<AllowNullLiteral>] Stop =
         abstract ``type``: string with get, set
         abstract id: string with get, set
@@ -74,6 +78,8 @@ module CreateClient =
         abstract lines: ReadonlyArray<Line> option with get, set
         abstract isMeta: bool option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
+        abstract ids: IDs option with get, set
+        abstract loadFactor: string option with get, set
 
     type [<AllowNullLiteral>] Region =
         abstract ``type``: string with get, set

@@ -55,6 +55,11 @@ let dumpGeometry (x: Geometry) =
     "coordinates",JArray [ for e in x.coordinates do yield JNumber  e ] 
     ] |> Map.ofList |> JObject
 
+let dumpIDs (x: IDs) =
+    [
+    "dhid", match x.dhid with  Some v -> JString (escapeString v)  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
 let dumpOperator (x: Operator) =
     [
     "type",JString (escapeString x.``type``) 
@@ -130,6 +135,8 @@ let dumpStop (x: Stop) =
     "lines", match x.lines with  Some v -> JArray [ for e in v do yield dumpLine e ]  | None -> JNull 
     "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
     "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
+    "ids", match x.ids with  Some v -> dumpIDs v  | None -> JNull 
+    "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpFeature (x: Feature) =
@@ -253,6 +260,7 @@ let dumpAlternative (x: Alternative) =
     "plannedPlatform", match x.plannedPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
     "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
+    "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpLeg (x: Leg) =

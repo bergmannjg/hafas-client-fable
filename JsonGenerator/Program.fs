@@ -95,6 +95,7 @@ let main argv =
     printfn "%s" intro
     // type Products has fixed implementation
     Generator.generateDumpFunction typeof<Geometry>
+    Generator.generateDumpFunction typeof<IDs>
     Generator.generateDumpFunction typeof<Operator>
     Generator.generateDumpFunction typeof<Location>
     Generator.generateDumpFunction typeof<ReisezentrumOpeningHours>
