@@ -18,7 +18,7 @@ check_files () {
     sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx00${NAME}-d.json > xx00${NAME}-x.json
     sed -E -e ':a;N;$!ba;s/,\n([[:blank:]]+)\x7d/\n\1\x7d/g' xx01${NAME}-d.json > xx01${NAME}-x.json
 
-    diff -I ": null" xx00${NAME}-x.json xx01${NAME}-x.json
+    diff -I ": null" -I "properties\": {}" xx00${NAME}-x.json xx01${NAME}-x.json
 }
 
 if [ $# -lt 3 ]

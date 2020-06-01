@@ -40,7 +40,20 @@ let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys
 let dumpProducts (x: Products) =
     let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
     Seq.toList json |> Map.ofList |> JObject
- """
+
+let dumpScheduledDays (x: ScheduledDays) =
+    let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+   
+let dumpFacilities (x: Facilities) =
+    let json =
+        Seq.map (fun k ->
+            (k,
+             match x.Item(k) with
+             | U2.Case1 s -> JString s
+             | U2.Case2 b -> JBool b)) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+"""
 
 let finale = """
 let dumpStations (stations: ReadonlyArray<Station>) =
@@ -81,12 +94,16 @@ let dumpU3StationsStopsLocations (stops: ReadonlyArray<U3<Station, Stop, Locatio
 let main argv =
     printfn "%s" intro
     // type Products has fixed implementation
-    Generator.generateDumpFunction typeof<Location>
-    Generator.generateDumpFunction typeof<Station>
-    Generator.generateDumpFunction typeof<Stop>
-    Generator.generateDumpFunction typeof<Region>
+    Generator.generateDumpFunction typeof<Geometry>
     Generator.generateDumpFunction typeof<Operator>
+    Generator.generateDumpFunction typeof<Location>
+    Generator.generateDumpFunction typeof<ReisezentrumOpeningHours>
+    Generator.generateDumpFunction typeof<Station>
     Generator.generateDumpFunction typeof<Line>
+    Generator.generateDumpFunction typeof<Stop>
+    Generator.generateDumpFunction typeof<Feature>
+    Generator.generateDumpFunction typeof<FeatureCollection>
+    Generator.generateDumpFunction typeof<Region>
     Generator.generateDumpFunction typeof<Route>
     Generator.generateDumpFunction typeof<Cycle>
     Generator.generateDumpFunction typeof<ArrivalDeparture>

@@ -35,7 +35,33 @@ let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys
 let dumpProducts (x: Products) =
     let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
     Seq.toList json |> Map.ofList |> JObject
- 
+
+let dumpScheduledDays (x: ScheduledDays) =
+    let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+   
+let dumpFacilities (x: Facilities) =
+    let json =
+        Seq.map (fun k ->
+            (k,
+             match x.Item(k) with
+             | U2.Case1 s -> JString s
+             | U2.Case2 b -> JBool b)) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+
+let dumpGeometry (x: Geometry) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "coordinates",JArray [ for e in x.coordinates do yield JNumber  e ] 
+    ] |> Map.ofList |> JObject
+
+let dumpOperator (x: Operator) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "id",JString (escapeString x.id) 
+    "name",JString (escapeString x.name) 
+    ] |> Map.ofList |> JObject
+
 let dumpLocation (x: Location) =
     [
     "type",JString (escapeString x.``type``) 
@@ -48,6 +74,17 @@ let dumpLocation (x: Location) =
     "altitude", match x.altitude with  Some v -> JNumber  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
+let dumpReisezentrumOpeningHours (x: ReisezentrumOpeningHours) =
+    [
+    "Mo", match x.Mo with  Some v -> JString (escapeString v)  | None -> JNull 
+    "Di", match x.Di with  Some v -> JString (escapeString v)  | None -> JNull 
+    "Mi", match x.Mi with  Some v -> JString (escapeString v)  | None -> JNull 
+    "Do", match x.Do with  Some v -> JString (escapeString v)  | None -> JNull 
+    "Fr", match x.Fr with  Some v -> JString (escapeString v)  | None -> JNull 
+    "Sa", match x.Sa with  Some v -> JString (escapeString v)  | None -> JNull 
+    "So", match x.So with  Some v -> JString (escapeString v)  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
 let rec dumpStation (x: Station) =
     [
     "type",JString (escapeString x.``type``) 
@@ -58,32 +95,8 @@ let rec dumpStation (x: Station) =
     "products", match x.products with  Some v -> dumpProducts v  | None -> JNull 
     "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
     "regions", match x.regions with  Some v -> JArray [ for e in v do yield JString (escapeString e) ]  | None -> JNull 
-    ] |> Map.ofList |> JObject
-
-let dumpStop (x: Stop) =
-    [
-    "type",JString (escapeString x.``type``) 
-    "id",JString (escapeString x.id) 
-    "name",JString (escapeString x.name) 
-    "station", match x.station with  Some v -> dumpStation v  | None -> JNull 
-    "location", match x.location with  Some v -> dumpLocation v  | None -> JNull 
-    "products",dumpProducts x.products 
-    "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
-    ] |> Map.ofList |> JObject
-
-let dumpRegion (x: Region) =
-    [
-    "type",JString (escapeString x.``type``) 
-    "id",JString (escapeString x.id) 
-    "name",JString (escapeString x.name) 
-    "stations",JArray [ for e in x.stations do yield JString (escapeString e) ] 
-    ] |> Map.ofList |> JObject
-
-let dumpOperator (x: Operator) =
-    [
-    "type",JString (escapeString x.``type``) 
-    "id",JString (escapeString x.id) 
-    "name",JString (escapeString x.name) 
+    "facilities", match x.facilities with  Some v -> dumpFacilities v  | None -> JNull 
+    "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpLine (x: Line) =
@@ -104,6 +117,40 @@ let dumpLine (x: Line) =
     "night", match x.night with  Some v -> JBool  v  | None -> JNull 
     "nr", match x.nr with  Some v -> JNumber  v  | None -> JNull 
     "symbol", match x.symbol with  Some v -> JString (escapeString v)  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
+let dumpStop (x: Stop) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "id",JString (escapeString x.id) 
+    "name",JString (escapeString x.name) 
+    "station", match x.station with  Some v -> dumpStation v  | None -> JNull 
+    "location", match x.location with  Some v -> dumpLocation v  | None -> JNull 
+    "products",dumpProducts x.products 
+    "lines", match x.lines with  Some v -> JArray [ for e in v do yield dumpLine e ]  | None -> JNull 
+    "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
+    "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
+let dumpFeature (x: Feature) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "properties", match x.properties with  Some v -> ( match v with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull ) | None -> JNull 
+    "geometry",dumpGeometry x.geometry 
+    ] |> Map.ofList |> JObject
+
+let dumpFeatureCollection (x: FeatureCollection) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "features",JArray [ for e in x.features do yield dumpFeature e ] 
+    ] |> Map.ofList |> JObject
+
+let dumpRegion (x: Region) =
+    [
+    "type",JString (escapeString x.``type``) 
+    "id",JString (escapeString x.id) 
+    "name",JString (escapeString x.name) 
+    "stations",JArray [ for e in x.stations do yield JString (escapeString e) ] 
     ] |> Map.ofList |> JObject
 
 let dumpRoute (x: Route) =
@@ -183,6 +230,7 @@ let dumpTrip (x: Trip) =
     "line", match x.line with  Some v -> dumpLine v  | None -> JNull 
     "direction", match x.direction with  Some v -> JString (escapeString v)  | None -> JNull 
     "reachable", match x.reachable with  Some v -> JBool  v  | None -> JNull 
+    "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpPrice (x: Price) =
@@ -237,6 +285,8 @@ let dumpLeg (x: Leg) =
     "transfer", match x.transfer with  Some v -> JBool  v  | None -> JNull 
     "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
     "alternatives", match x.alternatives with  Some v -> JArray [ for e in v do yield dumpAlternative e ]  | None -> JNull 
+    "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpJourney (x: Journey) =
@@ -247,6 +297,7 @@ let dumpJourney (x: Journey) =
     "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
     "price", match x.price with  Some v -> dumpPrice v  | None -> JNull 
     "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
+    "scheduledDays", match x.scheduledDays with  Some v -> dumpScheduledDays v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpDuration (x: Duration) =

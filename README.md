@@ -21,7 +21,7 @@ The F# App is compiled to Javasrcipt with [fable-splitter](https://www.npmjs.com
 * npm install
 * generate F# types: **npx ts2fable ./types/hafas-client/index.d.ts ./src/HafasClientTypes.fs**
 * generate dump functions: **dotnet run -p JsonGenerator/JsonGenerator.fsproj > src/HafasClientTypesDump.fs**
-* compile F# to JavaScript: **npx webpack --config src/webpack.config.js**
+* compile F# to JavaScript: **npx fable-splitter src -o build --commonjs**
 * run JavaScript program: **node build/JourneyInfoApp.js Db journeys Berlin Paris**
 
 ## Evaluation of TypeScipt declaration file

@@ -25,6 +25,9 @@ let journeyOptions results departure =
     jsOptions<JourneysOptions> (fun x ->
         x.results <- Some(float results)
         x.departure <- Some(departure)
+        x.stopovers <- Some(false)
+        x.scheduledDays <- Some(false)
+        x.polylines <- Some(false)
         x.stopovers <- Some(false))
 
 let defaultJourneyOptions = journeyOptions 3 System.DateTime.Now
