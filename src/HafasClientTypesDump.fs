@@ -55,7 +55,7 @@ let dumpGeometry (x: Geometry) =
     "coordinates",JArray [ for e in x.coordinates do yield JNumber  e ] 
     ] |> Map.ofList |> JObject
 
-let dumpIDs (x: IDs) =
+let dumpIds (x: Ids) =
     [
     "dhid", match x.dhid with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
@@ -135,7 +135,7 @@ let dumpStop (x: Stop) =
     "lines", match x.lines with  Some v -> JArray [ for e in v do yield dumpLine e ]  | None -> JNull 
     "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
     "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
-    "ids", match x.ids with  Some v -> dumpIDs v  | None -> JNull 
+    "ids", match x.ids with  Some v -> dumpIds v  | None -> JNull 
     "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
 
@@ -314,6 +314,24 @@ let dumpDuration (x: Duration) =
     "stations",JArray [ for e in x.stations do yield ( match e with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )] 
     ] |> Map.ofList |> JObject
 
+let dumpFrame (x: Frame) =
+    [
+    "origin",( match x.origin with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
+    "destination",( match x.destination with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
+    "t", match x.t with  Some v -> JNumber  v  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
+let dumpMovement (x: Movement) =
+    [
+    "direction", match x.direction with  Some v -> JString (escapeString v)  | None -> JNull 
+    "tripId", match x.tripId with  Some v -> JString (escapeString v)  | None -> JNull 
+    "line", match x.line with  Some v -> dumpLine v  | None -> JNull 
+    "location", match x.location with  Some v -> dumpLocation v  | None -> JNull 
+    "nextStopovers", match x.nextStopovers with  Some v -> JArray [ for e in v do yield dumpStopOver e ]  | None -> JNull 
+    "frames", match x.frames with  Some v -> JArray [ for e in v do yield dumpFrame e ]  | None -> JNull 
+    "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
 
 let dumpStations (stations: ReadonlyArray<Station>) =
     JArray [ for e in stations do yield dumpStation e ]
@@ -326,6 +344,9 @@ let dumpJourneys (journeys: ReadonlyArray<Journey>) =
 
 let dumpDurations (durations: ReadonlyArray<Duration>) =
     JArray [ for e in durations do yield dumpDuration e ]
+
+let dumMovements (movements: ReadonlyArray<Movement>) =
+    JArray [ for e in movements do yield dumpMovement e ]
 
 let dumpAlternatives (alternatives: ReadonlyArray<Alternative>) =
     JArray [ for e in alternatives do yield dumpAlternative e ]

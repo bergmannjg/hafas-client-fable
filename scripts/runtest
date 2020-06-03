@@ -56,3 +56,16 @@ then
     mv xx*.json ./out
 fi
 
+if [ $# -eq 6 ]
+then
+    Y=$4
+    NAME=${PROFILE}-${CMD}
+    NAME=$(echo $NAME | sed 's/ //g')
+    rm -f xx*${NAME}*.json
+    rm -f ./out/xx*${NAME}*.json
+    echo "${PROFILE} ${CMD} ${X} ${Y}"
+    node ./build/JourneyInfoApp.js ${PROFILE} ${CMD} ${X} ${Y} $5 $6 | csplit -sb "%02d${NAME}.json" - 2
+    check_files $NAME && echo "Success"
+    mv xx*.json ./out
+fi
+

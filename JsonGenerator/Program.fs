@@ -68,6 +68,9 @@ let dumpJourneys (journeys: ReadonlyArray<Journey>) =
 let dumpDurations (durations: ReadonlyArray<Duration>) =
     JArray [ for e in durations do yield dumpDuration e ]
 
+let dumMovements (movements: ReadonlyArray<Movement>) =
+    JArray [ for e in movements do yield dumpMovement e ]
+
 let dumpAlternatives (alternatives: ReadonlyArray<Alternative>) =
     JArray [ for e in alternatives do yield dumpAlternative e ]
 
@@ -95,7 +98,7 @@ let main argv =
     printfn "%s" intro
     // type Products has fixed implementation
     Generator.generateDumpFunction typeof<Geometry>
-    Generator.generateDumpFunction typeof<IDs>
+    Generator.generateDumpFunction typeof<Ids>
     Generator.generateDumpFunction typeof<Operator>
     Generator.generateDumpFunction typeof<Location>
     Generator.generateDumpFunction typeof<ReisezentrumOpeningHours>
@@ -117,5 +120,7 @@ let main argv =
     Generator.generateDumpFunction typeof<Leg>
     Generator.generateDumpFunction typeof<Journey>
     Generator.generateDumpFunction typeof<Duration>
+    Generator.generateDumpFunction typeof<Frame>
+    Generator.generateDumpFunction typeof<Movement>
     printfn "%s" finale
     0 // return an integer exit code

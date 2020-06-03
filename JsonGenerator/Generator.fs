@@ -68,7 +68,7 @@ let rec getValueExpr (prop: PropertyInfo) (g: Type) (varName: string) =
         getArrayExpr prop g.GenericTypeArguments.[0] varName getValueExpr
     else if g.Name = "U2`2" then
         "(" + (getU2StationStopExpr varName) + ")"
-    else if g.Name = "LineMode" then // todo
+    else if g.Name = "LineMode" || g.Name = "ProductTypeMode" then // todo
         "JString (" + varName + ".ToString()) "
     else
         let ft = (getFormat g.Name)

@@ -42,11 +42,13 @@ let printReachableFrom (client: HafasClient) name action =
     promise {
         try
             let! stations = client.locations name (Some defaultLocationOptions)
+
             let location =
                 match stations.[0] with
                 | Location location -> Some location
                 | Stop stop -> stop.location
                 | Station station -> station.location
+
             match location with
             | Some location ->
                 location.address <- Some "dummy"
@@ -104,8 +106,21 @@ let printTrip (client: HafasClient) tripId action =
     }
     |> ignore
 
+let printRadar (client: HafasClient) n w s e action =
+    promise {
+        try
+            let box = createBoundingBox (n |> float) (w |> float) (s |> float) (e |> float)
+            let! movements = client.radar box (Some defaultRadarOptions)
+            execute action movements
+            printSimpleJson (HafasClientTypesDump.dumMovements movements)
+
+        with ex -> eprintf "printRadar error: %s %s" ex.Message ex.StackTrace
+    }
+    |> ignore
+
 let toProfile (s: string) =
-    match FSharpType.GetUnionCases typedefof<Profile> |> Array.filter (fun case -> case.Name = s) with
+    match FSharpType.GetUnionCases typedefof<Profile>
+          |> Array.filter (fun case -> case.Name = s) with
     | [| case |] -> Some(FSharpValue.MakeUnion(case, [||]) :?> Profile)
     | _ -> None
 
@@ -126,6 +141,7 @@ let main argv =
                 | "locations" when argv.Length = 3 -> printLocations client argv.[2]
                 | "departures" when argv.Length = 3 -> printDepartures client argv.[2]
                 | "reachableFrom" when argv.Length = 3 -> printReachableFrom client argv.[2]
+                | "radar" when argv.Length = 6 -> printRadar client argv.[2] argv.[3] argv.[4] argv.[5]
                 | _ ->
                     eprintfn "expected 'journeys x y|trip x|locations x|departures x|reachableFrom x'"
                     ignore

@@ -31,3 +31,14 @@ let journeyOptions results departure =
         x.stopovers <- Some(false))
 
 let defaultJourneyOptions = journeyOptions 3 System.DateTime.Now
+
+let createBoundingBox n w s e = 
+    jsOptions<BoundingBox> (fun x ->
+        x.north <- n
+        x.west <- w
+        x.south <- s
+        x.east <- e)
+
+let radarOptions results = jsOptions<RadarOptions> (fun x -> x.results <- Some(float results))
+
+let defaultRadarOptions = radarOptions 2

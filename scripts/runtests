@@ -39,3 +39,5 @@ fi
 ./scripts/runtest Oebb check-journeys Berlin Wien
 ./scripts/runtest Pkp check-journeys Berlin Warschau
 ./scripts/runtest Sncb check-journeys Antwerpen Brüssel
+
+./scripts/runtest Db check-radar 54.906839 8.310925 53.634739 11.407455

@@ -11,20 +11,28 @@ type [<AllowNullLiteral>] IExports =
 
 module CreateClient =
 
+    /// A ProductType relates to how a means of transport "works" in local context.
+    /// Example: Even though S-Bahn and U-Bahn in Berlin are both trains, they have different operators, service patterns,
+    /// stations and look different. Therefore, they are two distinct products subway and suburban.
     type [<AllowNullLiteral>] ProductType =
         abstract id: string with get, set
-        abstract mode: string with get, set
+        abstract mode: ProductTypeMode with get, set
         abstract name: string with get, set
         abstract short: string with get, set
 
+    /// A profile is a specific customisation for each endpoint.
+    /// It parses data from the API differently, add additional information, or enable non-default methods.
     type [<AllowNullLiteral>] Profile =
         abstract locale: string with get, set
+        abstract timezone: string with get, set
+        abstract endpoint: string with get, set
         abstract products: ReadonlyArray<ProductType> with get, set
         abstract trip: bool option with get, set
         abstract radar: bool option with get, set
         abstract refreshJourney: bool option with get, set
         abstract reachableFrom: bool option with get, set
 
+    /// A location object is used by other items to indicate their locations.
     type [<AllowNullLiteral>] Location =
         abstract ``type``: string with get, set
         abstract id: string option with get, set
@@ -51,6 +59,10 @@ module CreateClient =
         abstract Sa: string option with get, set
         abstract So: string option with get, set
 
+    /// A station is a larger building or area that can be identified by a name.
+    /// It is usually represented by a single node on a public transport map.
+    /// Whereas a stop usually specifies a location, a station often is a broader area
+    /// that may span across multiple levels or buildings.
     type [<AllowNullLiteral>] Station =
         abstract ``type``: string with get, set
         abstract id: string with get, set
@@ -64,10 +76,12 @@ module CreateClient =
         abstract facilities: Facilities option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
 
-    type [<AllowNullLiteral>] IDs =
+    type [<AllowNullLiteral>] Ids =
         /// DELFI Haltestellen ID
         abstract dhid: string option with get, set
 
+    /// A stop is a single small point or structure at which vehicles stop.
+    /// A stop always belongs to a station. It may for example be a sign, a basic shelter or a railway platform.
     type [<AllowNullLiteral>] Stop =
         abstract ``type``: string with get, set
         abstract id: string with get, set
@@ -78,9 +92,10 @@ module CreateClient =
         abstract lines: ReadonlyArray<Line> option with get, set
         abstract isMeta: bool option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
-        abstract ids: IDs option with get, set
+        abstract ids: Ids option with get, set
         abstract loadFactor: string option with get, set
 
+    /// A region is a group of stations, for example a metropolitan area or a geographical or cultural region.
     type [<AllowNullLiteral>] Region =
         abstract ``type``: string with get, set
         abstract id: string with get, set
@@ -97,7 +112,7 @@ module CreateClient =
         abstract additionalName: string option with get, set
         abstract product: string option with get, set
         abstract ``public``: bool option with get, set
-        abstract mode: LineMode with get, set
+        abstract mode: ProductTypeMode with get, set
         /// routes ids
         abstract routes: ReadonlyArray<string> option with get, set
         abstract operator: Operator option with get, set
@@ -107,11 +122,12 @@ module CreateClient =
         abstract nr: float option with get, set
         abstract symbol: string option with get, set
 
+    /// A route represents a single set of stations, of a single line.
     type [<AllowNullLiteral>] Route =
         abstract ``type``: string with get, set
         abstract id: string with get, set
         abstract line: string with get, set
-        abstract mode: LineMode with get, set
+        abstract mode: ProductTypeMode with get, set
         /// stop ids
         abstract stops: ReadonlyArray<string> with get, set
 
@@ -124,11 +140,14 @@ module CreateClient =
         abstract arrival: float option with get, set
         abstract departure: float option with get, set
 
+    /// There are many ways to format schedules of public transport routes.
+    /// This one tries to balance the amount of data and consumability.
+    /// It is specifically geared towards urban public transport, with frequent trains and homogenous travels.
     type [<AllowNullLiteral>] Schedule =
         abstract ``type``: string with get, set
         abstract id: string with get, set
         abstract route: string with get, set
-        abstract mode: LineMode with get, set
+        abstract mode: ProductTypeMode with get, set
         abstract sequence: ReadonlyArray<ArrivalDeparture> with get, set
         /// array of Unix timestamps
         abstract starts: ReadonlyArray<string> with get, set
@@ -158,6 +177,7 @@ module CreateClient =
         abstract ``type``: string with get, set
         abstract features: ReadonlyArray<Feature> with get, set
 
+    /// A stopover represents a vehicle stopping at a stop/station at a specific time.
     type [<AllowNullLiteral>] StopOver =
         abstract stop: U2<Station, Stop> with get, set
         /// null, if last stopOver of trip
@@ -214,6 +234,7 @@ module CreateClient =
         abstract cancelled: bool option with get, set
         abstract loadFactor: string option with get, set
 
+    /// Leg of journey
     type [<AllowNullLiteral>] Leg =
         abstract tripId: string option with get, set
         abstract origin: U2<Station, Stop> with get, set
@@ -249,6 +270,8 @@ module CreateClient =
     type [<AllowNullLiteral>] ScheduledDays =
         [<Emit "$0[$1]{{=$2}}">] abstract Item: day: string -> bool with get, set
 
+    /// A journey is a computed set of directions to get from A to B at a specific time.
+    /// It would typically be the result of a route planning algorithm.
     type [<AllowNullLiteral>] Journey =
         abstract ``type``: string with get, set
         abstract legs: ReadonlyArray<Leg> with get, set
@@ -266,6 +289,20 @@ module CreateClient =
     type [<AllowNullLiteral>] Duration =
         abstract duration: float with get, set
         abstract stations: ReadonlyArray<U2<Station, Stop>> with get, set
+
+    type [<AllowNullLiteral>] Frame =
+        abstract origin: U2<Stop, Location> with get, set
+        abstract destination: U2<Stop, Location> with get, set
+        abstract t: float option with get, set
+
+    type [<AllowNullLiteral>] Movement =
+        abstract direction: string option with get, set
+        abstract tripId: string option with get, set
+        abstract line: Line option with get, set
+        abstract location: Location option with get, set
+        abstract nextStopovers: ReadonlyArray<StopOver> option with get, set
+        abstract frames: ReadonlyArray<Frame> option with get, set
+        abstract polyline: FeatureCollection option with get, set
 
     type [<AllowNullLiteral>] JourneysOptions =
         /// departure date, undefined corresponds to Date.Now
@@ -303,6 +340,7 @@ module CreateClient =
         abstract remarks: bool option with get, set
         /// 'slow', 'normal', 'fast'
         abstract walkingSpeed: string option with get, set
+        /// start with walking
         abstract startWithWalking: bool option with get, set
         /// language to get results in
         abstract language: string option with get, set
@@ -336,6 +374,7 @@ module CreateClient =
         abstract entrances: bool option with get, set
         /// parse & expose hints & warnings?
         abstract remarks: bool option with get, set
+        /// Language of the results
         abstract language: string option with get, set
 
     type [<AllowNullLiteral>] StopOptions =
@@ -345,6 +384,7 @@ module CreateClient =
         abstract subStops: bool option with get, set
         /// parse & expose entrances of stops/stations?
         abstract entrances: bool option with get, set
+        /// Language of the results
         abstract language: string option with get, set
 
     type [<AllowNullLiteral>] DeparturesArrivalsOptions =
@@ -384,6 +424,7 @@ module CreateClient =
         abstract entrances: bool option with get, set
         /// parse & expose hints & warnings?
         abstract remarks: bool option with get, set
+        /// language
         abstract language: string option with get, set
 
     type [<AllowNullLiteral>] NearByOptions =
@@ -401,36 +442,58 @@ module CreateClient =
         abstract entrances: bool option with get, set
         /// parse & expose lines at each stop/station?
         abstract linesOfStops: bool option with get, set
+        /// language
         abstract language: string option with get, set
 
     type [<AllowNullLiteral>] ReachableFromOptions =
+        /// when
         abstract ``when``: DateTime option with get, set
         /// maximum of transfers
         abstract maxTransfers: float option with get, set
         /// maximum travel duration in minutes, pass `null` for infinite
         abstract maxDuration: float option with get, set
+        /// products
         abstract products: Products option with get, set
         /// parse & expose sub-stops of stations?
         abstract subStops: bool option with get, set
         /// parse & expose entrances of stops/stations?
         abstract entrances: bool option with get, set
 
+    type [<AllowNullLiteral>] BoundingBox =
+        abstract north: float with get, set
+        abstract west: float with get, set
+        abstract south: float with get, set
+        abstract east: float with get, set
+
+    type [<AllowNullLiteral>] RadarOptions =
+        /// maximum number of vehicles
+        abstract results: float option with get, set
+        /// compute frames for the next n seconds
+        abstract duration: float option with get, set
+
     type [<AllowNullLiteral>] HafasClient =
         /// Retrieves journeys
         abstract journeys: (U3<string, Station, Location> -> U3<string, Station, Location> -> JourneysOptions option -> Promise<Journeys>) with get, set
+        /// refreshes a Journey
         abstract refreshJourney: (string -> RefreshJourneyOptions option -> Promise<Journey>) with get, set
+        /// Refetch information about a trip
         abstract trip: (string -> string -> TripOptions option -> Promise<Trip>) with get, set
         /// Retrieves departures
         abstract departures: (U2<string, Station> -> DeparturesArrivalsOptions option -> Promise<ResizeArray<Alternative>>) with get, set
+        /// Retrieves arrivals
         abstract arrivals: (U2<string, Station> -> DeparturesArrivalsOptions option -> Promise<ResizeArray<Alternative>>) with get, set
         /// Retrieves locations or stops
         abstract locations: (string -> LocationsOptions option -> Promise<ResizeArray<U3<Station, Stop, Location>>>) with get, set
+        /// Retrieves information about a stop
         abstract stop: (string -> StopOptions option -> Promise<Stop>) with get, set
-        /// Retrieves nearby stops
+        /// Retrieves nearby stops from location
         abstract nearby: (Location -> NearByOptions option -> Promise<ResizeArray<Stop>>) with get, set
+        /// Retrieves stations reachable within a certain time from a location
         abstract reachableFrom: (Location -> ReachableFromOptions option -> Promise<ResizeArray<Duration>>) with get, set
+        /// Retrieves all vehicles currently in an area.
+        abstract radar: (BoundingBox -> RadarOptions option -> Promise<ResizeArray<Movement>>) with get, set
 
-    type [<StringEnum>] [<RequireQualifiedAccess>] LineMode =
+    type [<StringEnum>] [<RequireQualifiedAccess>] ProductTypeMode =
         | Train
         | Bus
         | Watercraft
