@@ -33,6 +33,15 @@ fi
 
 ./scripts/runtest Bvg check-journeys Alexanderplatz OsloerStr
 ./scripts/runtest Db check-journeys Berlin Paris
+
+# find first tripId'
+TRIPID=$(grep tripId ./out/xx00Db-check-journeys-Berlin-Paris-x.json | head -1 | sed -E 's/.*:(.*)$/\1/' | sed 's/\"//g')
+
+if test ! -z "$TRIPID"
+ then
+   ./scripts/runtest Db check-trip $TRIPID
+ fi
+
 ./scripts/runtest Db check-journeys Berlin London
 ./scripts/runtest Db check-journeys Berlin Moskau
 ./scripts/runtest Nahsh check-journeys Husum Flenburg
