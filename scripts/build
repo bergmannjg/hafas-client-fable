@@ -7,6 +7,11 @@ if [  ! -d "./scripts" ]; then
 fi
 
 indexfile="./node_modules/@types/hafas-client/index.d.ts"
+indexfileToTest="./types/hafas-client/index.d.ts"
+if [ -f $indexfileToTest ]; then
+    echo "using $indexfileToTest"
+    indexfile=$indexfileToTest
+fi
 typefile="./src/HafasClientTypes.fs"
 dumpfile="./src/HafasClientTypesDump.fs"
 
