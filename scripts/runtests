@@ -43,7 +43,6 @@ if test ! -z "$TRIPID"
  fi
 
 ./scripts/runtest Db check-journeys Berlin London
-./scripts/runtest Db check-journeys Berlin Moskau
 ./scripts/runtest Nahsh check-journeys Husum Flenburg
 ./scripts/runtest Oebb check-journeys Berlin Wien
 ./scripts/runtest Pkp check-journeys Berlin Warschau

@@ -23,6 +23,9 @@ let (|Stop|_|)  obj =
 let (|Location|_|)  obj = 
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
+// adhoc way to resolve mutual recursion
+let mutable dumpStopFunc : (Stop -> Json) Option = None
+
 let escapeString (str : string) =
    if not (isNull str) && str.Contains "\"" then
        let buf = StringBuilder(str.Length)
@@ -39,6 +42,10 @@ let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys
 
 let dumpProducts (x: Products) =
     let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+
+let dumpIds (x: Ids) =
+    let json = Seq.map (fun k -> (k, JString (x.Item(k)))) (objectKeys x)
     Seq.toList json |> Map.ofList |> JObject
 
 let dumpScheduledDays (x: ScheduledDays) =
@@ -91,6 +98,9 @@ let dumpU3StationsStopsLocations (stops: ReadonlyArray<U3<Station, Stop, Locatio
                   | Station station -> dumpStation station
                   | _ -> JNull ]
 
+// resolve mutual recursions
+let init =
+    dumpStopFunc <- Some dumpStop
 """
 
 [<EntryPoint>]
@@ -98,7 +108,7 @@ let main argv =
     printfn "%s" intro
     // type Products has fixed implementation
     Generator.generateDumpFunction typeof<Geometry>
-    Generator.generateDumpFunction typeof<Ids>
+    Generator.generateDumpFunction typeof<Price>
     Generator.generateDumpFunction typeof<Operator>
     Generator.generateDumpFunction typeof<Location>
     Generator.generateDumpFunction typeof<ReisezentrumOpeningHours>
@@ -114,9 +124,8 @@ let main argv =
     Generator.generateDumpFunction typeof<Schedule>
     Generator.generateDumpFunction typeof<Hint>
     Generator.generateDumpFunction typeof<StopOver>
-    Generator.generateDumpFunction typeof<Trip>
-    Generator.generateDumpFunction typeof<Price>
     Generator.generateDumpFunction typeof<Alternative>
+    Generator.generateDumpFunction typeof<Trip>
     Generator.generateDumpFunction typeof<Leg>
     Generator.generateDumpFunction typeof<Journey>
     Generator.generateDumpFunction typeof<Duration>

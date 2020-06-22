@@ -52,7 +52,7 @@ let printReachableFrom (client: HafasClient) name action =
             match location with
             | Some location ->
                 location.address <- Some "dummy"
-                let! durations = client.reachableFrom location None
+                let! durations = client.reachableFrom.Value location (Some defaultreachableFromOptions)
                 execute action durations
                 printSimpleJson (HafasClientTypesDump.dumpDurations durations)
             | None -> ()
@@ -63,9 +63,12 @@ let printReachableFrom (client: HafasClient) name action =
 
 let printStop (client: HafasClient) id action =
     promise {
-        let! stop = client.stop id None
-        execute action stop
-        printSimpleJson (HafasClientTypesDump.dumpStop stop)
+        let! u3 = client.stop id None
+        match u3 with
+        | Stop stop -> 
+                execute action stop
+                printSimpleJson (HafasClientTypesDump.dumpStop stop)
+        | _ -> ()
     }
     |> ignore
 
@@ -78,18 +81,21 @@ let journeys (client: HafasClient) fromStation toStation =
             | Stop sFrom, Stop sTo ->
                 let! res = client.journeys (U3.Case1 sFrom.id) (U3.Case1 sTo.id) (Some defaultJourneyOptions)
                 return res.journeys
-            | _ -> return new System.Collections.Generic.List<Journey>() :> ReadonlyArray<Journey>
+            | _ -> return Some(new System.Collections.Generic.List<Journey>() :> ReadonlyArray<Journey>)
         with ex ->
             eprintf "journeys error: %s" ex.Message
-            return new System.Collections.Generic.List<Journey>() :> ReadonlyArray<Journey>
+            return Some(new System.Collections.Generic.List<Journey>() :> ReadonlyArray<Journey>)
     }
 
 let printJourneys (client: HafasClient) fromStation toStation action =
     promise {
         try
-            let! journeys = journeys client fromStation toStation
-            execute action journeys
-            printSimpleJson (HafasClientTypesDump.dumpJourneys journeys)
+            let! optJourneys = journeys client fromStation toStation
+            match optJourneys with
+            | Some journeys ->
+                    execute action journeys
+                    printSimpleJson (HafasClientTypesDump.dumpJourneys journeys)
+            | None -> ()
 
         with ex -> eprintf "printJourneyInfos error: %s %s" ex.Message ex.StackTrace
     }
@@ -98,7 +104,7 @@ let printJourneys (client: HafasClient) fromStation toStation action =
 let printTrip (client: HafasClient) tripId action =
     promise {
         try
-            let! trip = client.trip tripId "dummy" None
+            let! trip = client.trip.Value tripId "dummy" None
             execute action trip
             printSimpleJson (HafasClientTypesDump.dumpTrip trip)
 
@@ -110,7 +116,7 @@ let printRadar (client: HafasClient) n w s e action =
     promise {
         try
             let box = createBoundingBox (n |> float) (w |> float) (s |> float) (e |> float)
-            let! movements = client.radar box (Some defaultRadarOptions)
+            let! movements = client.radar.Value box (Some defaultRadarOptions)
             execute action movements
             printSimpleJson (HafasClientTypesDump.dumMovements movements)
 
@@ -127,6 +133,7 @@ let toProfile (s: string) =
 [<EntryPoint>]
 let main argv =
     if argv.Length > 2 then
+        HafasClientTypesDump.init
         match toProfile argv.[0] with
         | Some p ->
             let client = HafasClient.createHafasClient p "client"

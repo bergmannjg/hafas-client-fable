@@ -18,6 +18,9 @@ let (|Stop|_|)  obj =
 let (|Location|_|)  obj = 
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
+// adhoc way to resolve mutual recursion
+let mutable dumpStopFunc : (Stop -> Json) Option = None
+
 let escapeString (str : string) =
    if not (isNull str) && str.Contains "\"" then
        let buf = StringBuilder(str.Length)
@@ -34,6 +37,10 @@ let inline objectKeys (o: obj) : string seq = upcast JS.Constructors.Object.keys
 
 let dumpProducts (x: Products) =
     let json = Seq.map (fun k -> (k, JBool (x.Item(k)))) (objectKeys x)
+    Seq.toList json |> Map.ofList |> JObject
+
+let dumpIds (x: Ids) =
+    let json = Seq.map (fun k -> (k, JString (x.Item(k)))) (objectKeys x)
     Seq.toList json |> Map.ofList |> JObject
 
 let dumpScheduledDays (x: ScheduledDays) =
@@ -55,9 +62,11 @@ let dumpGeometry (x: Geometry) =
     "coordinates",JArray [ for e in x.coordinates do yield JNumber  e ] 
     ] |> Map.ofList |> JObject
 
-let dumpIds (x: Ids) =
+let dumpPrice (x: Price) =
     [
-    "dhid", match x.dhid with  Some v -> JString (escapeString v)  | None -> JNull 
+    "amount",JNumber  x.amount 
+    "currency",JString (escapeString x.currency) 
+    "hint", match x.hint with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpOperator (x: Operator) =
@@ -77,6 +86,7 @@ let dumpLocation (x: Location) =
     "longitude", match x.longitude with  Some v -> JNumber  v  | None -> JNull 
     "latitude", match x.latitude with  Some v -> JNumber  v  | None -> JNull 
     "altitude", match x.altitude with  Some v -> JNumber  v  | None -> JNull 
+    "distance", match x.distance with  Some v -> JNumber  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpReisezentrumOpeningHours (x: ReisezentrumOpeningHours) =
@@ -93,8 +103,8 @@ let dumpReisezentrumOpeningHours (x: ReisezentrumOpeningHours) =
 let rec dumpStation (x: Station) =
     [
     "type",JString (escapeString x.``type``) 
-    "id",JString (escapeString x.id) 
-    "name",JString (escapeString x.name) 
+    "id", match x.id with  Some v -> JString (escapeString v)  | None -> JNull 
+    "name", match x.name with  Some v -> JString (escapeString v)  | None -> JNull 
     "station", match x.station with  Some v -> dumpStation v  | None -> JNull 
     "location", match x.location with  Some v -> dumpLocation v  | None -> JNull 
     "products", match x.products with  Some v -> dumpProducts v  | None -> JNull 
@@ -102,6 +112,10 @@ let rec dumpStation (x: Station) =
     "regions", match x.regions with  Some v -> JArray [ for e in v do yield JString (escapeString e) ]  | None -> JNull 
     "facilities", match x.facilities with  Some v -> dumpFacilities v  | None -> JNull 
     "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
+    "stops", match x.stops with  Some v -> JArray [ for e in v do yield ( match e with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| Location s -> dumpLocation  s  | _ -> JNull )]  | None -> JNull 
+    "entrances", match x.entrances with  Some v -> JArray [ for e in v do yield dumpLocation e ]  | None -> JNull 
+    "transitAuthority", match x.transitAuthority with  Some v -> JString (escapeString v)  | None -> JNull 
+    "distance", match x.distance with  Some v -> JNumber  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpLine (x: Line) =
@@ -114,7 +128,7 @@ let dumpLine (x: Line) =
     "additionalName", match x.additionalName with  Some v -> JString (escapeString v)  | None -> JNull 
     "product", match x.product with  Some v -> JString (escapeString v)  | None -> JNull 
     "public", match x.``public`` with  Some v -> JBool  v  | None -> JNull 
-    "mode",JString (x.mode.ToString()) 
+    "mode", match x.mode with  Some v -> JString (v.ToString())  | None -> JNull 
     "routes", match x.routes with  Some v -> JArray [ for e in v do yield JString (escapeString e) ]  | None -> JNull 
     "operator", match x.operator with  Some v -> dumpOperator v  | None -> JNull 
     "express", match x.express with  Some v -> JBool  v  | None -> JNull 
@@ -128,21 +142,24 @@ let dumpStop (x: Stop) =
     [
     "type",JString (escapeString x.``type``) 
     "id",JString (escapeString x.id) 
-    "name",JString (escapeString x.name) 
+    "name", match x.name with  Some v -> JString (escapeString v)  | None -> JNull 
     "station", match x.station with  Some v -> dumpStation v  | None -> JNull 
     "location", match x.location with  Some v -> dumpLocation v  | None -> JNull 
-    "products",dumpProducts x.products 
+    "products", match x.products with  Some v -> dumpProducts v  | None -> JNull 
     "lines", match x.lines with  Some v -> JArray [ for e in v do yield dumpLine e ]  | None -> JNull 
     "isMeta", match x.isMeta with  Some v -> JBool  v  | None -> JNull 
     "reisezentrumOpeningHours", match x.reisezentrumOpeningHours with  Some v -> dumpReisezentrumOpeningHours v  | None -> JNull 
     "ids", match x.ids with  Some v -> dumpIds v  | None -> JNull 
     "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
+    "entrances", match x.entrances with  Some v -> JArray [ for e in v do yield dumpLocation e ]  | None -> JNull 
+    "transitAuthority", match x.transitAuthority with  Some v -> JString (escapeString v)  | None -> JNull 
+    "distance", match x.distance with  Some v -> JNumber  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpFeature (x: Feature) =
     [
     "type",JString (escapeString x.``type``) 
-    "properties", match x.properties with  Some v -> ( match v with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull ) | None -> JNull 
+    "properties", match x.properties with  Some v -> ( match v with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| U3.Case3 s -> JNull | _ -> JNull ) | None -> JNull 
     "geometry",dumpGeometry x.geometry 
     ] |> Map.ofList |> JObject
 
@@ -203,48 +220,24 @@ let dumpHint (x: Hint) =
 
 let dumpStopOver (x: StopOver) =
     [
-    "stop",( match x.stop with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
+    "stop",( match x.stop with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull )
     "departure", match x.departure with  Some v -> JString (escapeString v)  | None -> JNull 
     "departureDelay", match x.departureDelay with  Some v -> JNumber  v  | None -> JNull 
+    "prognosedDeparture", match x.prognosedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedDeparture", match x.plannedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
     "departurePlatform", match x.departurePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedDeparturePlatform", match x.prognosedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedDeparturePlatform", match x.plannedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "arrival", match x.arrival with  Some v -> JString (escapeString v)  | None -> JNull 
     "arrivalDelay", match x.arrivalDelay with  Some v -> JNumber  v  | None -> JNull 
+    "prognosedArrival", match x.prognosedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedArrival", match x.plannedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
     "arrivalPlatform", match x.arrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedArrivalPlatform", match x.prognosedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedArrivalPlatform", match x.plannedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
-    ] |> Map.ofList |> JObject
-
-let dumpTrip (x: Trip) =
-    [
-    "id",JString (escapeString x.id) 
-    "origin",dumpStop x.origin 
-    "departure",JString (escapeString x.departure) 
-    "departurePlatform", match x.departurePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "plannedDeparture",JString (escapeString x.plannedDeparture) 
-    "plannedDeparturePlatform", match x.plannedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "departureDelay", match x.departureDelay with  Some v -> JNumber  v  | None -> JNull 
-    "destination",dumpStop x.destination 
-    "arrival",JString (escapeString x.arrival) 
-    "arrivalPlatform", match x.arrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "plannedArrival",JString (escapeString x.plannedArrival) 
-    "plannedArrivalPlatform", match x.plannedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "arrivalDelay", match x.arrivalDelay with  Some v -> JNumber  v  | None -> JNull 
-    "stopovers",JArray [ for e in x.stopovers do yield dumpStopOver e ] 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
-    "line", match x.line with  Some v -> dumpLine v  | None -> JNull 
-    "direction", match x.direction with  Some v -> JString (escapeString v)  | None -> JNull 
-    "reachable", match x.reachable with  Some v -> JBool  v  | None -> JNull 
-    "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
-    ] |> Map.ofList |> JObject
-
-let dumpPrice (x: Price) =
-    [
-    "amount",JNumber  x.amount 
-    "currency",JString (escapeString x.currency) 
-    "hint", match x.hint with  Some v -> JString (escapeString v)  | None -> JNull 
+    "passBy", match x.passBy with  Some v -> JBool  v  | None -> JNull 
+    "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpAlternative (x: Alternative) =
@@ -252,31 +245,78 @@ let dumpAlternative (x: Alternative) =
     "tripId",JString (escapeString x.tripId) 
     "direction", match x.direction with  Some v -> JString (escapeString v)  | None -> JNull 
     "line", match x.line with  Some v -> dumpLine v  | None -> JNull 
-    "stop", match x.stop with  Some v -> ( match v with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull ) | None -> JNull 
-    "plannedWhen", match x.plannedWhen with  Some v -> JString (escapeString v)  | None -> JNull 
+    "stop", match x.stop with  Some v -> ( match v with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull ) | None -> JNull 
     "when", match x.``when`` with  Some v -> JString (escapeString v)  | None -> JNull 
+    "plannedWhen", match x.plannedWhen with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedWhen", match x.prognosedWhen with  Some v -> JString (escapeString v)  | None -> JNull 
     "delay", match x.delay with  Some v -> JNumber  v  | None -> JNull 
     "platform", match x.platform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedPlatform", match x.plannedPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedPlatform", match x.prognosedPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
     "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
     "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
+    "provenance", match x.provenance with  Some v -> JString (escapeString v)  | None -> JNull 
+    "previousStopovers", match x.previousStopovers with  Some v -> JArray [ for e in v do yield dumpStopOver e ]  | None -> JNull 
+    "nextStopovers", match x.nextStopovers with  Some v -> JArray [ for e in v do yield dumpStopOver e ]  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
+let dumpTrip (x: Trip) =
+    [
+    "id",JString (escapeString x.id) 
+    "origin",( match x.origin with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull )
+    "destination",( match x.destination with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull )
+    "departure", match x.departure with  Some v -> JString (escapeString v)  | None -> JNull 
+    "plannedDeparture", match x.plannedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedArrival", match x.prognosedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
+    "departureDelay", match x.departureDelay with  Some v -> JNumber  v  | None -> JNull 
+    "departurePlatform", match x.departurePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedDeparturePlatform", match x.prognosedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "plannedDeparturePlatform", match x.plannedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "arrival", match x.arrival with  Some v -> JString (escapeString v)  | None -> JNull 
+    "plannedArrival", match x.plannedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedDeparture", match x.prognosedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
+    "arrivalDelay", match x.arrivalDelay with  Some v -> JNumber  v  | None -> JNull 
+    "arrivalPlatform", match x.arrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedArrivalPlatform", match x.prognosedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "plannedArrivalPlatform", match x.plannedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "stopovers", match x.stopovers with  Some v -> JArray [ for e in v do yield dumpStopOver e ]  | None -> JNull 
+    "schedule", match x.schedule with  Some v -> JNumber  v  | None -> JNull 
+    "price", match x.price with  Some v -> dumpPrice v  | None -> JNull 
+    "operator", match x.operator with  Some v -> JNumber  v  | None -> JNull 
+    "direction", match x.direction with  Some v -> JString (escapeString v)  | None -> JNull 
+    "line", match x.line with  Some v -> dumpLine v  | None -> JNull 
+    "reachable", match x.reachable with  Some v -> JBool  v  | None -> JNull 
+    "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
+    "walking", match x.walking with  Some v -> JBool  v  | None -> JNull 
+    "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
+    "distance", match x.distance with  Some v -> JNumber  v  | None -> JNull 
+    "public", match x.``public`` with  Some v -> JBool  v  | None -> JNull 
+    "transfer", match x.transfer with  Some v -> JBool  v  | None -> JNull 
+    "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
+    "alternatives", match x.alternatives with  Some v -> JArray [ for e in v do yield dumpAlternative e ]  | None -> JNull 
+    "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpLeg (x: Leg) =
     [
     "tripId", match x.tripId with  Some v -> JString (escapeString v)  | None -> JNull 
-    "origin",( match x.origin with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
-    "destination",( match x.destination with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
+    "origin",( match x.origin with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull )
+    "destination",( match x.destination with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| _ -> JNull )
     "departure", match x.departure with  Some v -> JString (escapeString v)  | None -> JNull 
-    "plannedDeparture",JString (escapeString x.plannedDeparture) 
+    "plannedDeparture", match x.plannedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedArrival", match x.prognosedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
     "departureDelay", match x.departureDelay with  Some v -> JNumber  v  | None -> JNull 
     "departurePlatform", match x.departurePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedDeparturePlatform", match x.prognosedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedDeparturePlatform", match x.plannedDeparturePlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "arrival", match x.arrival with  Some v -> JString (escapeString v)  | None -> JNull 
-    "plannedArrival",JString (escapeString x.plannedArrival) 
+    "plannedArrival", match x.plannedArrival with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedDeparture", match x.prognosedDeparture with  Some v -> JString (escapeString v)  | None -> JNull 
     "arrivalDelay", match x.arrivalDelay with  Some v -> JNumber  v  | None -> JNull 
     "arrivalPlatform", match x.arrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
+    "prognosedArrivalPlatform", match x.prognosedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedArrivalPlatform", match x.plannedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "stopovers", match x.stopovers with  Some v -> JArray [ for e in v do yield dumpStopOver e ]  | None -> JNull 
     "schedule", match x.schedule with  Some v -> JNumber  v  | None -> JNull 
@@ -311,13 +351,13 @@ let dumpJourney (x: Journey) =
 let dumpDuration (x: Duration) =
     [
     "duration",JNumber  x.duration 
-    "stations",JArray [ for e in x.stations do yield ( match e with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )] 
+    "stations",JArray [ for e in x.stations do yield ( match e with | Station s -> dumpStation  s  | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| Location s -> dumpLocation  s  | _ -> JNull )] 
     ] |> Map.ofList |> JObject
 
 let dumpFrame (x: Frame) =
     [
-    "origin",( match x.origin with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
-    "destination",( match x.destination with | Station station -> dumpStation station | Stop stop -> dumpStop stop | _ -> JNull )
+    "origin",( match x.origin with | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| Location s -> dumpLocation  s  | _ -> JNull )
+    "destination",( match x.destination with | Stop s -> (match dumpStopFunc with | Some f -> f  s  | None -> JNull)| Location s -> dumpLocation  s  | _ -> JNull )
     "t", match x.t with  Some v -> JNumber  v  | None -> JNull 
     ] |> Map.ofList |> JObject
 
@@ -368,4 +408,7 @@ let dumpU3StationsStopsLocations (stops: ReadonlyArray<U3<Station, Stop, Locatio
                   | Station station -> dumpStation station
                   | _ -> JNull ]
 
+// resolve mutual recursions
+let init =
+    dumpStopFunc <- Some dumpStop
 

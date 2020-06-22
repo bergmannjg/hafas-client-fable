@@ -17,6 +17,7 @@ if [ ! -f ${typefile} ] || [ ${indexfile} -nt ${typefile} ]; then
 fi
 
 if [ ! -f ${dumpfile} ] || [ ${typefile} -nt ${dumpfile} ]; then
+    dotnet build JsonGenerator/JsonGenerator.fsproj
     dotnet run -p JsonGenerator/JsonGenerator.fsproj > ${dumpfile}
 fi
 

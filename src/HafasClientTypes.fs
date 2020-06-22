@@ -6,8 +6,9 @@ open Fable.Core.JS
 
 type ReadonlyArray<'T> = System.Collections.Generic.IReadOnlyList<'T>
 
+
 type [<AllowNullLiteral>] IExports =
-    abstract createClient: profile: CreateClient.Profile * userAgent: string -> CreateClient.HafasClient
+    abstract createClient: commonProfile: CreateClient.Profile * userAgent: string * ?opt: obj -> CreateClient.HafasClient
 
 module CreateClient =
 
@@ -19,6 +20,8 @@ module CreateClient =
         abstract mode: ProductTypeMode with get, set
         abstract name: string with get, set
         abstract short: string with get, set
+        abstract bitmasks: ResizeArray<float> with get, set
+        abstract ``default``: bool with get, set
 
     /// A profile is a specific customisation for each endpoint.
     /// It parses data from the API differently, add additional information, or enable non-default methods.
@@ -31,6 +34,7 @@ module CreateClient =
         abstract radar: bool option with get, set
         abstract refreshJourney: bool option with get, set
         abstract reachableFrom: bool option with get, set
+        abstract journeysWalkingSpeed: bool option with get, set
 
     /// A location object is used by other items to indicate their locations.
     type [<AllowNullLiteral>] Location =
@@ -42,6 +46,7 @@ module CreateClient =
         abstract longitude: float option with get, set
         abstract latitude: float option with get, set
         abstract altitude: float option with get, set
+        abstract distance: float option with get, set
 
     /// Each public transportation network exposes its products as boolean properties. See {@link ProductType}
     type [<AllowNullLiteral>] Products =
@@ -65,8 +70,8 @@ module CreateClient =
     /// that may span across multiple levels or buildings.
     type [<AllowNullLiteral>] Station =
         abstract ``type``: string with get, set
-        abstract id: string with get, set
-        abstract name: string with get, set
+        abstract id: string option with get, set
+        abstract name: string option with get, set
         abstract station: Station option with get, set
         abstract location: Location option with get, set
         abstract products: Products option with get, set
@@ -75,25 +80,32 @@ module CreateClient =
         abstract regions: ReadonlyArray<string> option with get, set
         abstract facilities: Facilities option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
+        abstract stops: ReadonlyArray<U3<Station, Stop, Location>> option with get, set
+        abstract entrances: ReadonlyArray<Location> option with get, set
+        abstract transitAuthority: string option with get, set
+        abstract distance: float option with get, set
 
+    /// Ids of a Stop, i.e. dhid as 'DELFI Haltestellen ID'
     type [<AllowNullLiteral>] Ids =
-        /// DELFI Haltestellen ID
-        abstract dhid: string option with get, set
+        [<Emit "$0[$1]{{=$2}}">] abstract Item: id: string -> string with get, set
 
     /// A stop is a single small point or structure at which vehicles stop.
     /// A stop always belongs to a station. It may for example be a sign, a basic shelter or a railway platform.
     type [<AllowNullLiteral>] Stop =
         abstract ``type``: string with get, set
         abstract id: string with get, set
-        abstract name: string with get, set
+        abstract name: string option with get, set
         abstract station: Station option with get, set
         abstract location: Location option with get, set
-        abstract products: Products with get, set
+        abstract products: Products option with get, set
         abstract lines: ReadonlyArray<Line> option with get, set
         abstract isMeta: bool option with get, set
         abstract reisezentrumOpeningHours: ReisezentrumOpeningHours option with get, set
         abstract ids: Ids option with get, set
         abstract loadFactor: string option with get, set
+        abstract entrances: ReadonlyArray<Location> option with get, set
+        abstract transitAuthority: string option with get, set
+        abstract distance: float option with get, set
 
     /// A region is a group of stations, for example a metropolitan area or a geographical or cultural region.
     type [<AllowNullLiteral>] Region =
@@ -112,7 +124,7 @@ module CreateClient =
         abstract additionalName: string option with get, set
         abstract product: string option with get, set
         abstract ``public``: bool option with get, set
-        abstract mode: ProductTypeMode with get, set
+        abstract mode: ProductTypeMode option with get, set
         /// routes ids
         abstract routes: ReadonlyArray<string> option with get, set
         abstract operator: Operator option with get, set
@@ -170,7 +182,7 @@ module CreateClient =
 
     type [<AllowNullLiteral>] Feature =
         abstract ``type``: string with get, set
-        abstract properties: U2<Station, Stop> option with get, set
+        abstract properties: U3<Station, Stop, obj> option with get, set
         abstract geometry: Geometry with get, set
 
     type [<AllowNullLiteral>] FeatureCollection =
@@ -183,37 +195,59 @@ module CreateClient =
         /// null, if last stopOver of trip
         abstract departure: string option with get, set
         abstract departureDelay: float option with get, set
+        abstract prognosedDeparture: string option with get, set
         abstract plannedDeparture: string option with get, set
         abstract departurePlatform: string option with get, set
+        abstract prognosedDeparturePlatform: string option with get, set
         abstract plannedDeparturePlatform: string option with get, set
         /// null, if first stopOver of trip
         abstract arrival: string option with get, set
         abstract arrivalDelay: float option with get, set
+        abstract prognosedArrival: string option with get, set
         abstract plannedArrival: string option with get, set
         abstract arrivalPlatform: string option with get, set
+        abstract prognosedArrivalPlatform: string option with get, set
         abstract plannedArrivalPlatform: string option with get, set
         abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract passBy: bool option with get, set
+        abstract cancelled: bool option with get, set
 
+    /// Trip – a vehicle stopping at a set of stops at specific times
     type [<AllowNullLiteral>] Trip =
         abstract id: string with get, set
-        abstract origin: Stop with get, set
-        abstract departure: string with get, set
-        abstract departurePlatform: string option with get, set
-        abstract plannedDeparture: string with get, set
-        abstract plannedDeparturePlatform: string option with get, set
+        abstract origin: U2<Station, Stop> with get, set
+        abstract destination: U2<Station, Stop> with get, set
+        abstract departure: string option with get, set
+        abstract plannedDeparture: string option with get, set
+        abstract prognosedArrival: string option with get, set
         abstract departureDelay: float option with get, set
-        abstract destination: Stop with get, set
-        abstract arrival: string with get, set
-        abstract arrivalPlatform: string option with get, set
-        abstract plannedArrival: string with get, set
-        abstract plannedArrivalPlatform: string option with get, set
+        abstract departurePlatform: string option with get, set
+        abstract prognosedDeparturePlatform: string option with get, set
+        abstract plannedDeparturePlatform: string option with get, set
+        abstract arrival: string option with get, set
+        abstract plannedArrival: string option with get, set
+        abstract prognosedDeparture: string option with get, set
         abstract arrivalDelay: float option with get, set
-        abstract stopovers: ReadonlyArray<StopOver> with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
-        abstract line: Line option with get, set
+        abstract arrivalPlatform: string option with get, set
+        abstract prognosedArrivalPlatform: string option with get, set
+        abstract plannedArrivalPlatform: string option with get, set
+        abstract stopovers: ReadonlyArray<StopOver> option with get, set
+        abstract schedule: float option with get, set
+        abstract price: Price option with get, set
+        abstract operator: float option with get, set
         abstract direction: string option with get, set
+        abstract line: Line option with get, set
         abstract reachable: bool option with get, set
+        abstract cancelled: bool option with get, set
+        abstract walking: bool option with get, set
+        abstract loadFactor: string option with get, set
+        abstract distance: float option with get, set
+        abstract ``public``: bool option with get, set
+        abstract transfer: bool option with get, set
+        abstract cycle: Cycle option with get, set
+        abstract alternatives: ReadonlyArray<Alternative> option with get, set
         abstract polyline: FeatureCollection option with get, set
+        abstract remarks: ReadonlyArray<Hint> option with get, set
 
     type [<AllowNullLiteral>] Price =
         abstract amount: float with get, set
@@ -225,14 +259,19 @@ module CreateClient =
         abstract direction: string option with get, set
         abstract line: Line option with get, set
         abstract stop: U2<Station, Stop> option with get, set
-        abstract plannedWhen: string option with get, set
         abstract ``when``: string option with get, set
+        abstract plannedWhen: string option with get, set
+        abstract prognosedWhen: string option with get, set
         abstract delay: float option with get, set
         abstract platform: string option with get, set
         abstract plannedPlatform: string option with get, set
+        abstract prognosedPlatform: string option with get, set
         abstract remarks: ReadonlyArray<Hint> option with get, set
         abstract cancelled: bool option with get, set
         abstract loadFactor: string option with get, set
+        abstract provenance: string option with get, set
+        abstract previousStopovers: ReadonlyArray<StopOver> option with get, set
+        abstract nextStopovers: ReadonlyArray<StopOver> option with get, set
 
     /// Leg of journey
     type [<AllowNullLiteral>] Leg =
@@ -240,14 +279,18 @@ module CreateClient =
         abstract origin: U2<Station, Stop> with get, set
         abstract destination: U2<Station, Stop> with get, set
         abstract departure: string option with get, set
-        abstract plannedDeparture: string with get, set
+        abstract plannedDeparture: string option with get, set
+        abstract prognosedArrival: string option with get, set
         abstract departureDelay: float option with get, set
         abstract departurePlatform: string option with get, set
+        abstract prognosedDeparturePlatform: string option with get, set
         abstract plannedDeparturePlatform: string option with get, set
         abstract arrival: string option with get, set
-        abstract plannedArrival: string with get, set
+        abstract plannedArrival: string option with get, set
+        abstract prognosedDeparture: string option with get, set
         abstract arrivalDelay: float option with get, set
         abstract arrivalPlatform: string option with get, set
+        abstract prognosedArrivalPlatform: string option with get, set
         abstract plannedArrivalPlatform: string option with get, set
         abstract stopovers: ReadonlyArray<StopOver> option with get, set
         abstract schedule: float option with get, set
@@ -284,11 +327,11 @@ module CreateClient =
     type [<AllowNullLiteral>] Journeys =
         abstract earlierRef: string option with get, set
         abstract laterRef: string option with get, set
-        abstract journeys: ReadonlyArray<Journey> with get, set
+        abstract journeys: ReadonlyArray<Journey> option with get, set
 
     type [<AllowNullLiteral>] Duration =
         abstract duration: float with get, set
-        abstract stations: ReadonlyArray<U2<Station, Stop>> with get, set
+        abstract stations: ReadonlyArray<U3<Station, Stop, Location>> with get, set
 
     type [<AllowNullLiteral>] Frame =
         abstract origin: U2<Stop, Location> with get, set
@@ -346,6 +389,7 @@ module CreateClient =
         abstract language: string option with get, set
         /// parse which days each journey is valid on
         abstract scheduledDays: bool option with get, set
+        abstract ``when``: DateTime option with get, set
 
     type [<AllowNullLiteral>] LocationsOptions =
         /// find only exact matches?
@@ -358,6 +402,10 @@ module CreateClient =
         abstract addresses: bool option with get, set
         /// points of interest
         abstract poi: bool option with get, set
+        /// parse & expose sub-stops of stations?
+        abstract subStops: bool option with get, set
+        /// parse & expose entrances of stops/stations?
+        abstract entrances: bool option with get, set
         /// parse & expose lines at each stop/station?
         abstract linesOfStops: bool option with get, set
         /// Language of the results
@@ -468,16 +516,28 @@ module CreateClient =
     type [<AllowNullLiteral>] RadarOptions =
         /// maximum number of vehicles
         abstract results: float option with get, set
+        /// nr of frames to compute
+        abstract frames: float option with get, set
+        /// optionally an object of booleans
+        abstract products: U2<bool, obj> option with get, set
         /// compute frames for the next n seconds
         abstract duration: float option with get, set
+        /// parse & expose sub-stops of stations?
+        abstract subStops: bool option with get, set
+        /// parse & expose entrances of stops/stations?
+        abstract entrances: bool option with get, set
+        /// return a shape for the trip?
+        abstract polylines: bool option with get, set
+        /// when
+        abstract ``when``: DateTime option with get, set
 
     type [<AllowNullLiteral>] HafasClient =
         /// Retrieves journeys
         abstract journeys: (U3<string, Station, Location> -> U3<string, Station, Location> -> JourneysOptions option -> Promise<Journeys>) with get, set
         /// refreshes a Journey
-        abstract refreshJourney: (string -> RefreshJourneyOptions option -> Promise<Journey>) with get, set
+        abstract refreshJourney: (string -> RefreshJourneyOptions option -> Promise<Journey>) option with get, set
         /// Refetch information about a trip
-        abstract trip: (string -> string -> TripOptions option -> Promise<Trip>) with get, set
+        abstract trip: (string -> string -> TripOptions option -> Promise<Trip>) option with get, set
         /// Retrieves departures
         abstract departures: (U2<string, Station> -> DeparturesArrivalsOptions option -> Promise<ResizeArray<Alternative>>) with get, set
         /// Retrieves arrivals
@@ -485,13 +545,13 @@ module CreateClient =
         /// Retrieves locations or stops
         abstract locations: (string -> LocationsOptions option -> Promise<ResizeArray<U3<Station, Stop, Location>>>) with get, set
         /// Retrieves information about a stop
-        abstract stop: (string -> StopOptions option -> Promise<Stop>) with get, set
+        abstract stop: (string -> StopOptions option -> Promise<U3<Station, Stop, Location>>) with get, set
         /// Retrieves nearby stops from location
-        abstract nearby: (Location -> NearByOptions option -> Promise<ResizeArray<Stop>>) with get, set
+        abstract nearby: (Location -> NearByOptions option -> Promise<ResizeArray<U3<Station, Stop, Location>>>) with get, set
         /// Retrieves stations reachable within a certain time from a location
-        abstract reachableFrom: (Location -> ReachableFromOptions option -> Promise<ResizeArray<Duration>>) with get, set
+        abstract reachableFrom: (Location -> ReachableFromOptions option -> Promise<ResizeArray<Duration>>) option with get, set
         /// Retrieves all vehicles currently in an area.
-        abstract radar: (BoundingBox -> RadarOptions option -> Promise<ResizeArray<Movement>>) with get, set
+        abstract radar: (BoundingBox -> RadarOptions option -> Promise<ResizeArray<Movement>>) option with get, set
 
     type [<StringEnum>] [<RequireQualifiedAccess>] ProductTypeMode =
         | Train

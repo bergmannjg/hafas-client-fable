@@ -35,11 +35,23 @@ let hasDumpFunction (g: Type) =
     else
         false
 
-let getU2StationStopExpr (name: string) =
+let getU2Expr (prop: PropertyInfo) (name: string) (t1: Type) (t2:Type) (getValueStmt: PropertyInfo -> Type -> string -> string) =
     let line = System.Collections.Generic.List()
     sprintf " match %s with " name |> line.Add
-    "| Station station -> " + dump + "Station station " |> line.Add
-    "| Stop stop -> " + dump + "Stop stop " |> line.Add
+    "| " + t1.Name + " s -> " + (getValueStmt prop t1 " s ") |> line.Add
+    "| " + t2.Name + " s -> " + (getValueStmt prop t2 " s ") |> line.Add
+    "| _ -> JNull " |> line.Add
+    line |> String.concat ""
+
+let getU3Expr (prop: PropertyInfo) (name: string) (t1: Type) (t2:Type) (t3:Type) (getValueStmt: PropertyInfo -> Type -> string -> string) =
+    let line = System.Collections.Generic.List()
+    sprintf " match %s with " name |> line.Add
+    "| " + t1.Name + " s -> " + (getValueStmt prop t1 " s ") |> line.Add
+    "| " + t2.Name + " s -> " + (getValueStmt prop t2 " s ") |> line.Add
+    if  t3.Name <> "Object" then
+        "| " + t3.Name + " s -> " + (getValueStmt prop t3 " s ") |> line.Add
+    else 
+        "| U3.Case3 s -> JNull " |> line.Add
     "| _ -> JNull " |> line.Add
     line |> String.concat ""
 
@@ -61,13 +73,16 @@ let getOptionExpr (prop: PropertyInfo) (g: Type) (getValueStmt: PropertyInfo -> 
 
 let rec getValueExpr (prop: PropertyInfo) (g: Type) (varName: string) =
     if hasDumpFunction g then
-        dump + g.Name + " " + varName + " "
+        if g.Name = "Stop" then "(match dumpStopFunc with | Some f -> f " + varName + " | None -> JNull)"
+        else dump + g.Name + " " + varName + " "
     else if g.Name = "FSharpOption`1" then
         getOptionExpr prop g.GenericTypeArguments.[0] getValueExpr
     else if g.Name = "List`1" || g.Name = "IReadOnlyList`1" then
         getArrayExpr prop g.GenericTypeArguments.[0] varName getValueExpr
     else if g.Name = "U2`2" then
-        "(" + (getU2StationStopExpr varName) + ")"
+        "(" + (getU2Expr prop varName g.GenericTypeArguments.[0] g.GenericTypeArguments.[1] getValueExpr) + ")"
+    else if g.Name = "U3`3" then
+        "(" + (getU3Expr prop varName g.GenericTypeArguments.[0] g.GenericTypeArguments.[1] g.GenericTypeArguments.[2] getValueExpr) + ")"
     else if g.Name = "LineMode" || g.Name = "ProductTypeMode" then // todo
         "JString (" + varName + ".ToString()) "
     else

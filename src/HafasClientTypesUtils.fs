@@ -42,3 +42,7 @@ let createBoundingBox n w s e =
 let radarOptions results = jsOptions<RadarOptions> (fun x -> x.results <- Some(float results))
 
 let defaultRadarOptions = radarOptions 2
+
+let reachableFromOptions maxDuration = jsOptions<ReachableFromOptions> (fun x -> x.maxDuration <- Some(float maxDuration))
+
+let defaultreachableFromOptions = reachableFromOptions 5
