@@ -170,11 +170,26 @@ module CreateClient =
         abstract name: string with get, set
 
     type [<AllowNullLiteral>] Hint =
-        abstract ``type``: string with get, set
+        abstract ``type``: HintType with get, set
         abstract code: string option with get, set
         abstract summary: string option with get, set
         abstract text: string with get, set
         abstract tripId: string option with get, set
+
+    type [<AllowNullLiteral>] Warning =
+        abstract ``type``: WarningType with get, set
+        abstract id: float option with get, set
+        abstract icon: string option with get, set
+        abstract summary: string option with get, set
+        abstract text: string with get, set
+        abstract category: string option with get, set
+        abstract priority: float option with get, set
+        abstract products: Products option with get, set
+        abstract edges: ResizeArray<obj option> option with get, set
+        abstract events: ResizeArray<obj option> option with get, set
+        abstract validFrom: string option with get, set
+        abstract validUntil: string option with get, set
+        abstract modified: string option with get, set
 
     type [<AllowNullLiteral>] Geometry =
         abstract ``type``: string with get, set
@@ -208,7 +223,7 @@ module CreateClient =
         abstract arrivalPlatform: string option with get, set
         abstract prognosedArrivalPlatform: string option with get, set
         abstract plannedArrivalPlatform: string option with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract remarks: ReadonlyArray<U2<Hint, Warning>> option with get, set
         abstract passBy: bool option with get, set
         abstract cancelled: bool option with get, set
 
@@ -247,7 +262,7 @@ module CreateClient =
         abstract cycle: Cycle option with get, set
         abstract alternatives: ReadonlyArray<Alternative> option with get, set
         abstract polyline: FeatureCollection option with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract remarks: ReadonlyArray<U2<Hint, Warning>> option with get, set
 
     type [<AllowNullLiteral>] Price =
         abstract amount: float with get, set
@@ -266,7 +281,7 @@ module CreateClient =
         abstract platform: string option with get, set
         abstract plannedPlatform: string option with get, set
         abstract prognosedPlatform: string option with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract remarks: ReadonlyArray<U2<Hint, Warning>> option with get, set
         abstract cancelled: bool option with get, set
         abstract loadFactor: string option with get, set
         abstract provenance: string option with get, set
@@ -308,7 +323,7 @@ module CreateClient =
         abstract cycle: Cycle option with get, set
         abstract alternatives: ReadonlyArray<Alternative> option with get, set
         abstract polyline: FeatureCollection option with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract remarks: ReadonlyArray<U2<Hint, Warning>> option with get, set
 
     type [<AllowNullLiteral>] ScheduledDays =
         [<Emit "$0[$1]{{=$2}}">] abstract Item: day: string -> bool with get, set
@@ -319,7 +334,7 @@ module CreateClient =
         abstract ``type``: string with get, set
         abstract legs: ReadonlyArray<Leg> with get, set
         abstract refreshToken: string option with get, set
-        abstract remarks: ReadonlyArray<Hint> option with get, set
+        abstract remarks: ReadonlyArray<U2<Hint, Warning>> option with get, set
         abstract price: Price option with get, set
         abstract cycle: Cycle option with get, set
         abstract scheduledDays: ScheduledDays option with get, set
@@ -328,6 +343,7 @@ module CreateClient =
         abstract earlierRef: string option with get, set
         abstract laterRef: string option with get, set
         abstract journeys: ReadonlyArray<Journey> option with get, set
+        abstract realtimeDataFrom: float option with get, set
 
     type [<AllowNullLiteral>] Duration =
         abstract duration: float with get, set
@@ -432,6 +448,8 @@ module CreateClient =
         abstract subStops: bool option with get, set
         /// parse & expose entrances of stops/stations?
         abstract entrances: bool option with get, set
+        /// parse & expose hints & warnings?
+        abstract remarks: bool option with get, set
         /// Language of the results
         abstract language: string option with get, set
 
@@ -563,3 +581,16 @@ module CreateClient =
         | Car
         | Bicycle
         | Walking
+
+    type [<StringEnum>] [<RequireQualifiedAccess>] HintType =
+        | Hint
+        | Status
+        | [<CompiledName "foreign-id">] ForeignId
+        | [<CompiledName "local-fare-zone">] LocalFareZone
+        | [<CompiledName "stop-website">] StopWebsite
+        | [<CompiledName "stop-dhid">] StopDhid
+        | [<CompiledName "transit-authority">] TransitAuthority
+
+    type [<StringEnum>] [<RequireQualifiedAccess>] WarningType =
+        | Status
+        | Warning

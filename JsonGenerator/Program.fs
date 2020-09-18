@@ -23,6 +23,12 @@ let (|Stop|_|)  obj =
 let (|Location|_|)  obj = 
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
+let (|Hint|_|)  obj = 
+    if obj?``type`` = "hint" then Some (Hint(unbox obj)) else None
+
+let (|Warning|_|)  obj = 
+    if obj?``type`` = "warning" then Some (Warning(unbox obj)) else None
+
 // adhoc way to resolve mutual recursion
 let mutable dumpStopFunc : (Stop -> Json) Option = None
 
@@ -123,6 +129,7 @@ let main argv =
     Generator.generateDumpFunction typeof<ArrivalDeparture>
     Generator.generateDumpFunction typeof<Schedule>
     Generator.generateDumpFunction typeof<Hint>
+    Generator.generateDumpFunction typeof<Warning>
     Generator.generateDumpFunction typeof<StopOver>
     Generator.generateDumpFunction typeof<Alternative>
     Generator.generateDumpFunction typeof<Trip>

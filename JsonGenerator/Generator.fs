@@ -72,7 +72,8 @@ let getOptionExpr (prop: PropertyInfo) (g: Type) (getValueStmt: PropertyInfo -> 
     + " | None -> JNull "
 
 let rec getValueExpr (prop: PropertyInfo) (g: Type) (varName: string) =
-    if hasDumpFunction g then
+    if prop.Name = "edges" || prop.Name = "events" then "JNull" // ignore
+    else if hasDumpFunction g then
         if g.Name = "Stop" then "(match dumpStopFunc with | Some f -> f " + varName + " | None -> JNull)"
         else dump + g.Name + " " + varName + " "
     else if g.Name = "FSharpOption`1" then
@@ -83,7 +84,7 @@ let rec getValueExpr (prop: PropertyInfo) (g: Type) (varName: string) =
         "(" + (getU2Expr prop varName g.GenericTypeArguments.[0] g.GenericTypeArguments.[1] getValueExpr) + ")"
     else if g.Name = "U3`3" then
         "(" + (getU3Expr prop varName g.GenericTypeArguments.[0] g.GenericTypeArguments.[1] g.GenericTypeArguments.[2] getValueExpr) + ")"
-    else if g.Name = "LineMode" || g.Name = "ProductTypeMode" then // todo
+    else if g.Name = "LineMode" || g.Name = "ProductTypeMode"  || g.Name = "HintType"  || g.Name = "WarningType" then // todo
         "JString (" + varName + ".ToString()) "
     else
         let ft = (getFormat g.Name)

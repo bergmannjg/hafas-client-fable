@@ -18,6 +18,12 @@ let (|Stop|_|)  obj =
 let (|Location|_|)  obj = 
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
+let (|Hint|_|)  obj = 
+    if obj?``type`` = "hint" then Some (Hint(unbox obj)) else None
+
+let (|Warning|_|)  obj = 
+    if obj?``type`` = "warning" then Some (Warning(unbox obj)) else None
+
 // adhoc way to resolve mutual recursion
 let mutable dumpStopFunc : (Stop -> Json) Option = None
 
@@ -211,11 +217,28 @@ let dumpSchedule (x: Schedule) =
 
 let dumpHint (x: Hint) =
     [
-    "type",JString (escapeString x.``type``) 
+    "type",JString (x.``type``.ToString()) 
     "code", match x.code with  Some v -> JString (escapeString v)  | None -> JNull 
     "summary", match x.summary with  Some v -> JString (escapeString v)  | None -> JNull 
     "text",JString (escapeString x.text) 
     "tripId", match x.tripId with  Some v -> JString (escapeString v)  | None -> JNull 
+    ] |> Map.ofList |> JObject
+
+let dumpWarning (x: Warning) =
+    [
+    "type",JString (x.``type``.ToString()) 
+    "id", match x.id with  Some v -> JNumber  v  | None -> JNull 
+    "icon", match x.icon with  Some v -> JString (escapeString v)  | None -> JNull 
+    "summary", match x.summary with  Some v -> JString (escapeString v)  | None -> JNull 
+    "text",JString (escapeString x.text) 
+    "category", match x.category with  Some v -> JString (escapeString v)  | None -> JNull 
+    "priority", match x.priority with  Some v -> JNumber  v  | None -> JNull 
+    "products", match x.products with  Some v -> dumpProducts v  | None -> JNull 
+    "edges",JNull
+    "events",JNull
+    "validFrom", match x.validFrom with  Some v -> JString (escapeString v)  | None -> JNull 
+    "validUntil", match x.validUntil with  Some v -> JString (escapeString v)  | None -> JNull 
+    "modified", match x.modified with  Some v -> JString (escapeString v)  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpStopOver (x: StopOver) =
@@ -235,7 +258,7 @@ let dumpStopOver (x: StopOver) =
     "arrivalPlatform", match x.arrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "prognosedArrivalPlatform", match x.prognosedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedArrivalPlatform", match x.plannedArrivalPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield ( match e with | Hint s -> dumpHint  s  | Warning s -> dumpWarning  s  | _ -> JNull )]  | None -> JNull 
     "passBy", match x.passBy with  Some v -> JBool  v  | None -> JNull 
     "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
     ] |> Map.ofList |> JObject
@@ -253,7 +276,7 @@ let dumpAlternative (x: Alternative) =
     "platform", match x.platform with  Some v -> JString (escapeString v)  | None -> JNull 
     "plannedPlatform", match x.plannedPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
     "prognosedPlatform", match x.prognosedPlatform with  Some v -> JString (escapeString v)  | None -> JNull 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield ( match e with | Hint s -> dumpHint  s  | Warning s -> dumpWarning  s  | _ -> JNull )]  | None -> JNull 
     "cancelled", match x.cancelled with  Some v -> JBool  v  | None -> JNull 
     "loadFactor", match x.loadFactor with  Some v -> JString (escapeString v)  | None -> JNull 
     "provenance", match x.provenance with  Some v -> JString (escapeString v)  | None -> JNull 
@@ -296,7 +319,7 @@ let dumpTrip (x: Trip) =
     "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
     "alternatives", match x.alternatives with  Some v -> JArray [ for e in v do yield dumpAlternative e ]  | None -> JNull 
     "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield ( match e with | Hint s -> dumpHint  s  | Warning s -> dumpWarning  s  | _ -> JNull )]  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpLeg (x: Leg) =
@@ -334,7 +357,7 @@ let dumpLeg (x: Leg) =
     "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
     "alternatives", match x.alternatives with  Some v -> JArray [ for e in v do yield dumpAlternative e ]  | None -> JNull 
     "polyline", match x.polyline with  Some v -> dumpFeatureCollection v  | None -> JNull 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield ( match e with | Hint s -> dumpHint  s  | Warning s -> dumpWarning  s  | _ -> JNull )]  | None -> JNull 
     ] |> Map.ofList |> JObject
 
 let dumpJourney (x: Journey) =
@@ -342,7 +365,7 @@ let dumpJourney (x: Journey) =
     "type",JString (escapeString x.``type``) 
     "legs",JArray [ for e in x.legs do yield dumpLeg e ] 
     "refreshToken", match x.refreshToken with  Some v -> JString (escapeString v)  | None -> JNull 
-    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield dumpHint e ]  | None -> JNull 
+    "remarks", match x.remarks with  Some v -> JArray [ for e in v do yield ( match e with | Hint s -> dumpHint  s  | Warning s -> dumpWarning  s  | _ -> JNull )]  | None -> JNull 
     "price", match x.price with  Some v -> dumpPrice v  | None -> JNull 
     "cycle", match x.cycle with  Some v -> dumpCycle v  | None -> JNull 
     "scheduledDays", match x.scheduledDays with  Some v -> dumpScheduledDays v  | None -> JNull 
