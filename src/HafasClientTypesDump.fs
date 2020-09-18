@@ -19,7 +19,7 @@ let (|Location|_|)  obj =
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
 let (|Hint|_|)  obj = 
-    if obj?``type`` = "hint" then Some (Hint(unbox obj)) else None
+    if obj?``type`` = "hint" || obj?``type`` = "status" then Some (Hint(unbox obj)) else None
 
 let (|Warning|_|)  obj = 
     if obj?``type`` = "warning" then Some (Warning(unbox obj)) else None
@@ -234,8 +234,8 @@ let dumpWarning (x: Warning) =
     "category", match x.category with  Some v -> JString (escapeString v)  | None -> JNull 
     "priority", match x.priority with  Some v -> JNumber  v  | None -> JNull 
     "products", match x.products with  Some v -> dumpProducts v  | None -> JNull 
-    "edges",JNull
-    "events",JNull
+    "edges", match x.edges with  Some v -> JArray [ for e in v do yield  match e with  Some v -> JString (v.ToString())  | None -> JNull ]  | None -> JNull 
+    "events", match x.events with  Some v -> JArray [ for e in v do yield  match e with  Some v -> JString (v.ToString())  | None -> JNull ]  | None -> JNull 
     "validFrom", match x.validFrom with  Some v -> JString (escapeString v)  | None -> JNull 
     "validUntil", match x.validUntil with  Some v -> JString (escapeString v)  | None -> JNull 
     "modified", match x.modified with  Some v -> JString (escapeString v)  | None -> JNull 

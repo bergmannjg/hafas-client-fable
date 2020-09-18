@@ -24,7 +24,7 @@ let (|Location|_|)  obj =
     if obj?``type`` = "location" then Some (Location(unbox obj)) else None
 
 let (|Hint|_|)  obj = 
-    if obj?``type`` = "hint" then Some (Hint(unbox obj)) else None
+    if obj?``type`` = "hint" || obj?``type`` = "status" then Some (Hint(unbox obj)) else None
 
 let (|Warning|_|)  obj = 
     if obj?``type`` = "warning" then Some (Warning(unbox obj)) else None
